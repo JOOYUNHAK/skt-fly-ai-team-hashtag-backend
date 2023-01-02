@@ -1,14 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { User } from '../../user/entity/user.entity';
 
-export class LoginDto {
-    @ApiProperty({
-        description: '사용자가 입력한 닉네임',
-        example: '해시태그'
-    })
-    nickName: string    
-    @ApiProperty({
-        description: '사용자가 입력한 휴대폰번호',
-        example: '01024893797'
-    })
-    phoneNumber: string    
-}
+export class LoginDto extends PickType(User, [
+    'id', 'nickname'
+] as const) {}
