@@ -13,6 +13,10 @@ export class AuthController {
     })
     @ApiBody({ 
         type: LoginDto,
+        description: '사용자가 입력한 닉네임'           
+    })
+    @ApiBody({ 
+        type: LoginDto,
         description: '사용자가 입력한 휴대폰 번호'           
     })
     @ApiResponse({
