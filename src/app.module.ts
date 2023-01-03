@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import databaseConfiguration from 'config/database.configuration';
 import { AuthModule } from './api/v1/auth/auth.module';
+import { AuthService } from './api/v1/auth/auth.service';
 import { LikeModule } from './api/v1/like/like.module';
 import { SearchModule } from './api/v1/search/search.module';
 import { UserModule } from './api/v1/user/user.module';
@@ -24,6 +25,6 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthService],
 })
 export class AppModule {}

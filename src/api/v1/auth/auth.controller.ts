@@ -1,11 +1,15 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, Get } from "@nestjs/common";
 import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { AuthService } from "./auth.service";
 import { LoginResponseDto } from "./dto/login-response.dto";
 import { LoginDto } from "./dto/login.dto";
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
+    constructor(
+        private authService: AuthService
+    ) {}
     @ApiOperation({
         summary: '로그인',
         description: 
@@ -25,7 +29,8 @@ export class AuthController {
         type: LoginResponseDto
     })
     @Post('login')
-    async login(@Body() loginDto: LoginDto): Promise<string> {
-        return '로그인 성공';
+    async login(@Body() loginDto: LoginDto): Promise<any> {
+        return await this.authService.login(loginDto);
     }
+    
 }
