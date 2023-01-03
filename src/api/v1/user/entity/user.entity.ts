@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { LoginDto } from "../../auth/dto/login.dto";
 
 @Entity({ name: 'user' })
 export class User {
@@ -24,6 +25,13 @@ export class User {
     @Column({ type: 'varchar', length: 20, nullable: false })
     nickname: string;
 
-    @Column({ type: 'timestamp' })
-    createdAt: Date
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    created_at: Date
+
+    static registerNewUser(loginDto: LoginDto) {
+        const user = new User();
+        user.id = loginDto.id;
+        user.nickname = loginDto.nickname;
+        return user;     
+    }
 }
