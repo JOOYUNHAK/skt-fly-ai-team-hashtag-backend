@@ -1,6 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { UserDto } from "../../auth/dto/user.dto";
-
 export class LikeDto {
     @ApiProperty({
         description: '각 추천의 번호(DB에서 AUTO_INCREMENT 값)',
