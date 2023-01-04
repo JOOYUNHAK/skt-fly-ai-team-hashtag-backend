@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { LoginResponseDto } from '../auth/dto/login-response.dto';
 import { LoginDto } from '../auth/dto/login.dto';
+import { createResponse } from '../generic/create-response';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
 
@@ -9,7 +10,7 @@ import { User } from './entity/user.entity';
 export class UserService {
     constructor(
         @Inject('USER_REPOSITORY')
-        private readonly userRepository: Repository<User>
+        private readonly userRepository: Repository<User>,
     ) {}
 
     /* DB에서 id로 사용자 찾기 */
@@ -29,14 +30,8 @@ export class UserService {
 
         delete newUser.created_at;
         
-        return {
-            'statusCode': 200,
-            'message': '신규 사용자 로그인',
-            'body': {
-                'user': {
-                    ...newUser
-                }
-            } 
-        }
+        return createResponse<number, string, object>([
+            'login', 201, '신규 사용자 로그인', newUser
+        ]);
     }
 }
