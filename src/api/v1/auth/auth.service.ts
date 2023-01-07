@@ -11,7 +11,7 @@ export class AuthService {
     ) { }
     /* 사용자 로그인 */
     async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-        const user = await this.userService.findUser(loginDto.id);
+        const user = await this.userService.findUser(loginDto.phoneNumber);
         // 회원가입이 되어 있는 사용자라면 바로 사용자 정보 반환
         if (user) {
             return createResponse<number, string, object>([

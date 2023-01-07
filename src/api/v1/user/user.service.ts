@@ -14,11 +14,11 @@ export class UserService {
     ) {}
 
     /* DB에서 id로 사용자 찾기 */
-    async findUser(id: string): Promise<UserDto> {
+    async findUser(phoneNumber: string): Promise<UserDto> {
         return await this.userRepository
             .createQueryBuilder()
-            .select('seq')
-            .where('id = :id', { id: id })
+            .select('id')
+            .where('phone_number = :phoneNumber', { phoneNumber })
             .getRawOne()
     }
 
@@ -28,7 +28,7 @@ export class UserService {
             User.registerNewUser(loginDto)
         );
 
-        delete newUser.created_at;
+        delete newUser.createdAt;
         
         return createResponse<number, string, object>([
             'login', 201, '신규 사용자 로그인', newUser
