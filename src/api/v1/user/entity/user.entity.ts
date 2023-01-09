@@ -1,14 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import { LoginDto } from "../../auth/dto/login.dto";
+import { LoginRequestDto } from "../../auth/login/dto/login-requestdto";
 @Entity({ name: 'user' })
 export class User {
     @ApiProperty({
         example: '011d8eebc58e0a7d796690800200c9a66',
         description: '사용자가 생성될 때마다 부여되는 ordered uuid값'
     })
-    @PrimaryColumn()
+    @PrimaryColumn({ 
+        type: 'binary', 
+        length: 16,
+    })
     id: string;
 
     @ApiProperty({
@@ -28,16 +31,16 @@ export class User {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })
     createdAt: Date
 
-    getOrderedUuid() {
+    static createOrderedUuid() {
         const uuid = uuidv4();
         const orderedUuid = uuid.split('-');
         return orderedUuid[2] + orderedUuid[1] + 
             orderedUuid[0] + orderedUuid[3] + orderedUuid[4];
     } 
 
-    static registerNewUser(loginDto: LoginDto) {
+    static registerNewUser(loginDto: LoginRequestDto) {
         const user = new User();
-        user.id = user.getOrderedUuid();
+        //user.id = user.createOrderedUuid();
         user.phoneNumber = loginDto.phoneNumber;
         user.nickName = loginDto.nickName;
         return user;     
