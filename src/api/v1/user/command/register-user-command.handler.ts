@@ -14,8 +14,7 @@ export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserC
         const { id, phoneNumber, nickName } = command;
         await this.dataSource.manager.query(
             `INSERT INTO user(id, phone_number, nickname) 
-                VALUES(UUID_TO_BIN(?, true), ?, ?)`, [id, phoneNumber, nickName]
+                VALUES(UNHEX(?), ?, ?)`, [id, phoneNumber, nickName]
         );
-        console.log('회원가입 완료')
     }
 }

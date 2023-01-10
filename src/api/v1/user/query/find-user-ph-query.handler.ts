@@ -14,12 +14,10 @@ export class FindUserByPhoneNumberQueryHandler implements IQueryHandler<FindUser
 
     async execute(query: FindUserByPhoneNumberQuery): Promise<FindByPhoneNumberResponseDto> {
         const { phoneNumber } = query;
-        const id = await this.userRepository
+        return await this.userRepository
             .createQueryBuilder()
-            .select('id')
+            .select('LOWER(HEX(id))', 'id')
             .where('phone_number = :phoneNumber', { phoneNumber })
             .getRawOne();
-        console.log(phoneNumber)
-        return id;
     }
 }
