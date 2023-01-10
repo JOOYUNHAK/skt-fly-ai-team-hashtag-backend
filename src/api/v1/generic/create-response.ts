@@ -1,4 +1,4 @@
-export function createResponse<T,U,M>(data: (T|U|M) []): any {
+export function createResponse<T>(data: (String|Number|T) []): any {
     const [type, statusCode, message, responseData] = data;
     let response = {
         statusCode,
@@ -8,9 +8,7 @@ export function createResponse<T,U,M>(data: (T|U|M) []): any {
         return {
             ...response,
             'body': {
-                'user': {
-                    ...responseData
-                }
+                'user': responseData[0]
             }
         }
     }
