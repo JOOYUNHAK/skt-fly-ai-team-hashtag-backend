@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { v4 as uuidv4 } from "uuid";
+import { v1 as uuidv1 } from "uuid";
 import { LoginRequestDto } from "../../auth/login/dto/login-requestdto";
 @Entity({ name: 'user' })
 export class User {
@@ -32,7 +32,7 @@ export class User {
     createdAt: Date
 
     static createOrderedUuid() {
-        const uuid = uuidv4();
+        const uuid = uuidv1();
         const orderedUuid = uuid.split('-');
         return orderedUuid[2] + orderedUuid[1] + 
             orderedUuid[0] + orderedUuid[3] + orderedUuid[4];
@@ -40,7 +40,6 @@ export class User {
 
     static registerNewUser(loginDto: LoginRequestDto) {
         const user = new User();
-        //user.id = user.createOrderedUuid();
         user.phoneNumber = loginDto.phoneNumber;
         user.nickName = loginDto.nickName;
         return user;     
