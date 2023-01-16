@@ -7,7 +7,6 @@ export const storage = diskStorage({
     /* 파일들 저장위치( 비디오와 이미지 월별로 따로 ) */
     destination: async (req, file, callback) => {
         const month = new Date().toLocaleString('en-EU', { month: '2-digit' });
-        console.log(file)
         let path = file.fieldname === 'video'
             ? process.env.VIDEO_DEST : process.env.IMAGE_DEST;
         path += month;
