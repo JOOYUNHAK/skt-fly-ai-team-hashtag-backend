@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 import databaseConfiguration from 'config/database.configuration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
 import { VideoModule } from './video/video.module';
 
 @Module({
@@ -13,14 +13,7 @@ import { VideoModule } from './video/video.module';
       isGlobal: true,
       load: [databaseConfiguration]
     }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('mongodb.uri'),
-        heartbeatFrequencyMS: configService.get<number>('mongodb.heartbeat')
-      }),
-      inject: [ConfigService]
-    })
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
