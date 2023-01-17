@@ -1,16 +1,19 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
+import { DatabaseModule } from "src/database/database.module";
 import { UploadFilesCommandHandler } from "./command/upload-files-command.handler";
-import { VideoSchema } from "./schemas/video.schema";
+import { GetStreamingPathQueryHandler } from "./query/get-streaming-path-query.handler";
 import { VideoController } from "./video.controller";
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{ name: 'videos', schema: VideoSchema }]),
-        CqrsModule
+        CqrsModule,
+        DatabaseModule
     ],
     controllers: [VideoController],
-    providers: [UploadFilesCommandHandler]
+    providers: [
+        UploadFilesCommandHandler,
+        GetStreamingPathQueryHandler
+    ]
 })
 export class VideoModule {}
