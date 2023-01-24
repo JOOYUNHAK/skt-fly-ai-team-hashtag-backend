@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import awsConfiguration from 'config/aws.configuration';
 import databaseConfiguration from 'config/database.configuration';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,7 +12,7 @@ import { VideoModule } from './video/video.module';
     VideoModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfiguration]
+      load: [databaseConfiguration, awsConfiguration]
     }),
     DatabaseModule,
   ],
