@@ -19,7 +19,11 @@ export const multerOptionsFactory = (configService: ConfigService): MulterOption
             key(req, file, callback) {
                 const ext = extname(file.originalname); // 확장자
                 const baseName = basename(file.originalname, ext); // 확장자 제외
-                callback(null, `${baseName}-${Date.now()}${ext}`) // 파일이름-날짜.확장자
+                // 파일이름-날짜.확장자
+                const fileName = ext === '.mp4' ? 
+                    `videos/${baseName}-${Date.now()}${ext}` :
+                    `images/${baseName}-${Date.now()}${ext}`
+                callback(null, fileName) 
             }
         }),
         limits: {
