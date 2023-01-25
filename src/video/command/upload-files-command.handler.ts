@@ -8,9 +8,14 @@ export class UploadFilesCommandHandler implements ICommandHandler<UploadFilesCom
     constructor(
         @Inject('MONGO_CONNECTION')
         private db: Db
-    ) {}
+    ) { }
 
     async execute(command: UploadFilesCommand) {
-        await this.db.collection('videos').insertOne(command);
+        await this.db
+            .collection('videos')
+            .insertOne({
+                ...command,
+                uploadedAt: Date.now()
+            });
     }
 }
