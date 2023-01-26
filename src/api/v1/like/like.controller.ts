@@ -12,7 +12,7 @@ export class LikeController {
     })
     @ApiBody({
         type: LikeRequestDto,
-        description: '추천을 누른 사용자의 seq, video의 id'
+        description: '추천을 누른 사용자의 id, video의 id'
     })
     @ApiResponse({
         status: 201,

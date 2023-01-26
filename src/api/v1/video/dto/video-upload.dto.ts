@@ -2,8 +2,18 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class VideoUploadDto {
     @ApiProperty({
-        description: 'video를 업로드하는 사용자의 seq 번호',
-        example: 2
+        description: 'upload하는 user의 id',
+        example: '8d7fa89df7ds7afsfaf'
     })
-    seq: number;
+    id: string;
+    @ApiProperty({
+        description: 'upload하는 user의 닉네임',
+        example: '흐암'
+    })
+    nickName: string;
+    @ApiProperty({
+        description: 'video를 upload 하고 받은 s3 경로',
+        example: 'https:// aws~~'
+    })
+    url: string;
 }
