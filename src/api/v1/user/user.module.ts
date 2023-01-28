@@ -9,7 +9,10 @@ import { userRepository } from "./user.repository";
 import { UserService } from './user.service';
 
 @Module({
-    imports: [DatabaseModule, CqrsModule],
+    imports: [
+        DatabaseModule,
+        CqrsModule
+    ],
     controllers: [UserController],
     providers: [
         ...userRepository,
