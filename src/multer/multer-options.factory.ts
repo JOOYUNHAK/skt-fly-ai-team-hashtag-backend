@@ -15,15 +15,16 @@ export const multerOptionsFactory = (configService: ConfigService): MulterOption
                 }
             }),
             bucket: configService.get('AWS.S3.BUCKET'),
+            acl: 'public-read',
             contentType: multerS3.AUTO_CONTENT_TYPE,
             key(req, file, callback) {
                 const ext = extname(file.originalname); // 확장자
                 const baseName = basename(file.originalname, ext); // 확장자 제외
                 // 파일이름-날짜.확장자
-                const fileName = ext === '.mp4' ? 
+                const fileName = ext === '.mp4' ?
                     `videos/${baseName}-${Date.now()}${ext}` :
                     `images/${baseName}-${Date.now()}${ext}`
-                callback(null, fileName) 
+                callback(null, fileName)
             }
         }),
         limits: {
