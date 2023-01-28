@@ -36,6 +36,7 @@ export class AuthController {
     })
     @Post('login')
     async login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+        console.log(loginRequestDto)
         const { phoneNumber, nickName } = loginRequestDto;
         const id = await this.queryBus.execute(new FindUserByPhoneNumberQuery(phoneNumber));
 
