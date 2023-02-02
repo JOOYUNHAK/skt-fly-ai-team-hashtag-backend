@@ -4,6 +4,8 @@ import { IsLikedVideoQueryHandler } from 'src/like/query/is-liked-video-query.ha
 import { RedisModule } from '../redis/redis.module';
 import { AddLikeCommandHandler } from './command/add-like-command.handler';
 import { CancelLikeCommandHandler } from './command/cancel-like-command.handler';
+import { AddLikeEventHandler } from './event/add-like-event.handler';
+import { CancelLikeEventHandler } from './event/cancel-like-event.handler';
 import { LikeController } from './like.controller';
 
 @Module({
@@ -14,7 +16,9 @@ import { LikeController } from './like.controller';
     providers: [
         AddLikeCommandHandler,
         CancelLikeCommandHandler,
-        IsLikedVideoQueryHandler
+        IsLikedVideoQueryHandler,
+        AddLikeEventHandler,
+        CancelLikeEventHandler
     ],
     controllers: [LikeController],
 })
