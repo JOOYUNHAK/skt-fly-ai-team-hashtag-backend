@@ -7,7 +7,7 @@ import { LoginResponseDto } from "./user-service/dto/user-service-responses.dto"
 
 @Controller('api/v1')
 export class ApiGateway {
-  constructor( private readonly httpService: HttpService ) {}
+  constructor(private readonly httpService: HttpService) { }
   private readonly baseUrl = 'http://localhost';
   /*
    * Service: User/Auth 
@@ -15,12 +15,12 @@ export class ApiGateway {
    * Port: 8080
   */
   @Get('user/feed/:id')
-  async getMyFeedRequest(@Param('id') id: string): Promise<AxiosResponse<void>> { 
+  async getMyFeedRequest(@Param('id') id: string): Promise<AxiosResponse<any>> {
     try {
       const { data } = await this.httpService.axiosRef.get(`${this.baseUrl}:8080/user/feed/${id}`);
-      return;
+      return data;
     }
-    catch(err) {
+    catch (err) {
       throw new HttpException(
         '죄송해요. 사용자서버에 문제가 생겨 복구중이에요...',
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -30,8 +30,18 @@ export class ApiGateway {
 
   @Post('auth/login')
   async loginRequest(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto | void> {
-    const { phoneNumber, nickName} = loginRequestDto;
-    const { data } = await this.httpService.axiosRef.post(`${this.baseUrl}:8080/auth/login`, { phoneNumber, nickName });
+    try {
+      const { phoneNumber, nickName } = loginRequestDto;
+      const { data } = await this.httpService.axiosRef.post(`${this.baseUrl}:8080/auth/login`, { phoneNumber, nickName });
+      return data;
+    }
+    catch(err) {
+      console.log(err)
+      throw new HttpException(
+        '죄송해요 사용자서버에 문제가 생겨 복구중이에요...',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
   }
 
   /*
@@ -39,11 +49,23 @@ export class ApiGateway {
    * Router: video/
    * Port: 8081 
   */
-  @Get('video')
-  async videoListRequest() {}
+  @Get('video/list')
+  async videoListRequest(): Promise<AxiosResponse<any>> {
+    try {
+      const { data } = await this.httpService.axiosRef.get(`${this.baseUrl}:8081/video/list`);
+      return data;
+    }
+    catch (err) {
+      console.log(err)
+      throw new HttpException(
+        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요...',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
+  }
 
   @Get('video/:videoId')
-  async videoDetailInfoRequest(@Param('videoId') videoId: string): Promise<any> {}
+  async videoDetailInfoRequest(@Param('videoId') videoId: string): Promise<any> { }
 
   /* 
    * Service: Like 
@@ -51,12 +73,12 @@ export class ApiGateway {
    * Port: 8082 
   */
   @Put('like')
-  async pushLikeRequest(@Body() pushLikeDto: PushLikeDto): Promise<void> { 
+  async pushLikeRequest(@Body() pushLikeDto: PushLikeDto): Promise<void> {
     try {
       const { userId, videoId } = pushLikeDto;
       await this.httpService.axiosRef.put(`${this.baseUrl}:8082/like`, { userId, videoId });
     }
-    catch(err) {
+    catch (err) {
       console.log(err)
       throw new HttpException(
         '죄송해요. 좋아요서버에 문제가 생겨 복구중이에요...',
@@ -71,5 +93,5 @@ export class ApiGateway {
    * Port: 8083
   */
   @Get('search/video')
-  async searchVideoRequest(@Query('keyword') keyword: string) {}
+  async searchVideoRequest(@Query('keyword') keyword: string) { }
 }
