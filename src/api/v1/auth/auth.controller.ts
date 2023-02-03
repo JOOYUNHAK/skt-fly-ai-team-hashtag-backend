@@ -8,13 +8,15 @@ import { LoginRequestDto } from "./login/dto/login-requestdto";
 import { User } from "../user/entity/user.entity";
 import { RegisterUserCommand } from "../user/command/regitster-user.command";
 import { createResponse } from "../generic/create-response";
+import { HttpService } from "@nestjs/axios";
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
     constructor(
         private queryBus: QueryBus,
-        private commandBus: CommandBus
+        private commandBus: CommandBus,
+        private httpService: HttpService
     ) { }
     @ApiOperation({
         summary: '로그인',
@@ -36,17 +38,25 @@ export class AuthController {
     })
     @Post('login')
     async login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-        console.log(loginRequestDto)
         const { phoneNumber, nickName } = loginRequestDto;
-        const id = await this.queryBus.execute(new FindUserByPhoneNumberQuery(phoneNumber));
-
+        const { id } = await this.queryBus.execute(new FindUserByPhoneNumberQuery(phoneNumber));
         /* 로그인 성공 */
         if (id) {
-            // 로그인 성공 이벤트
-            const response = await this.queryBus.execute(new GetUserInfoQuery(id.id));
-            return createResponse([
-                'login', 200, '로그인성공', response
-            ])
+            const [ {data}, userInfo ] = await Promise.all([
+                /* 좋아요 service에 해당 user의 좋아요 list 요청 */
+                this.httpService.axiosRef.get(`http://localhost:8082/like/list/${id}`),
+                this.queryBus.execute(new GetUserInfoQuery(id))
+            ]);
+            return {
+                statusCode: 200,
+                message: 'OK 기존 회원 로그인',
+                body: {
+                    user: {
+                        ...userInfo[0],
+                        likeList: [...data]
+                    }
+                }
+            };
         }
         return this.register(phoneNumber, nickName);
     }
@@ -55,9 +65,9 @@ export class AuthController {
         /* 회원가입 */
         const uuid = User.createOrderedUuid();
         await this.commandBus.execute(new RegisterUserCommand(uuid, phoneNumber, nickName));
-        const response = await this.queryBus.execute(new GetUserInfoQuery(uuid));
+        const user = await this.queryBus.execute(new GetUserInfoQuery(uuid));
         return createResponse([
-            'login', 201, '회원가입 이후 로그인성공', response
+            'login', 201, '회원가입 이후 로그인성공', user
         ])
     }
 }
