@@ -2,7 +2,8 @@ import { Controller, Post, UploadedFiles, UseInterceptors, Get, Body, Param } fr
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { UploadFilesCommand } from "./command/upload-files.command";
-import { UploadFilesDto } from "./dto/upload-files.dto";
+import { GetThumbNailPathResponseDto, GetVideoListResponseDto } from "./dto/response/video-request-response.dto";
+import { GetThumbNailPathQuery } from "./query/get-thumb-nail-path.query";
 import { GetVideoListQuery } from "./query/get-video-list.query";
 import { GetVideoPathQuery } from "./query/get-video-path.query";
 
@@ -13,7 +14,7 @@ export class VideoController {
         private readonly queryBus: QueryBus
     ) { }
 
-    @Post()
+    /* @Post()
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'video', maxCount: 1 },
         { name: 'image', maxCount: 1 }
@@ -27,11 +28,32 @@ export class VideoController {
         await this.commandBus.execute(
             new UploadFilesCommand(owner, video[0].location, image[0].location)
         );
+    } */
+
+    /* main page loading시 최신 비디오, 인기 비디오 로딩 */
+    @Get('list')
+    async getVideoList(): Promise<GetVideoListResponseDto> {
+        const data = await this.queryBus.execute(new GetVideoListQuery());
+        return {
+            statusCode: 200,
+            message: 'OK',
+            body: {
+                ...data
+            }
+        }
     }
 
-    @Get()
-    async getVideoList() {
-        await this.queryBus.execute(new GetVideoListQuery());
+    /* 사용자 MyFeed 조회 */
+    @Get(`image/:id`)
+    async getThumbNailPaths(@Param('id') userId: string):Promise<GetThumbNailPathResponseDto> {
+        const data = await this.queryBus.execute( new GetThumbNailPathQuery(userId) );
+        return {
+            statusCode: 200,
+            message: 'OK',
+            body: {
+                ...data
+            }
+        };
     }
 
     @Get(':videoId')
