@@ -1,3 +1,4 @@
+import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from '@nestjs/cqrs';
 import { DatabaseModule } from "src/database/database.module";
@@ -9,9 +10,13 @@ import { userRepository } from "./user.repository";
 import { UserService } from './user.service';
 
 @Module({
-    imports: [
+    imports: [ 
         DatabaseModule,
-        CqrsModule
+        CqrsModule,
+        HttpModule.register({
+            timeout: 3000,
+            maxRedirects: 3
+        })
     ],
     controllers: [UserController],
     providers: [
