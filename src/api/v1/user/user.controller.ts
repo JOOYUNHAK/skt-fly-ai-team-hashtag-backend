@@ -1,3 +1,4 @@
+import { HttpService } from "@nestjs/axios";
 import { Controller, Get, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CommonResponseDto } from "../swagger/dto/common-response.dto";
@@ -6,6 +7,7 @@ import { VideoResponseDto } from "../video/dto/video-response.dto";
 @ApiTags('User')
 @Controller('user')
 export class UserController {
+    constructor( private readonly httpService: HttpService ) {}
     @ApiOperation({
         summary: '내 피드 조회',
         description: '내가 업로드 했던 video list 조회'
@@ -26,8 +28,24 @@ export class UserController {
         description: '올린 video가 하나도 없는 경우',
         type: CommonResponseDto
     })
-    @Get('feed/:seq')
-    async getMyFeed(@Param('seq') id: number): Promise<any> {
-
+    @Get('feed/:id')
+    async getMyFeed(@Param('id') id: number) {
+        const { data } = await this.httpService.axiosRef.get(`http://localhost:8081/video/image/${id}`);
+        return {
+            statusCode: 200,
+            message: 'OK',
+            body: {
+                video: [
+                    {
+                        id: '1233423fajef',
+                        thumbNailPath: 'aws address'
+                    },
+                    {
+                        id: '123dfjasdjf',
+                        thumbNailPath: 'aws address'
+                    }
+                ]
+            }
+        }
     }
 }
