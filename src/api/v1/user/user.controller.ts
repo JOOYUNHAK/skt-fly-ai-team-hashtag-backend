@@ -3,6 +3,8 @@ import { Controller, Get, Param } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CommonResponseDto } from "../swagger/dto/common-response.dto";
 import { VideoResponseDto } from "../video/dto/video-response.dto";
+import { MyFeedDto } from "./dto/my-feed.dto";
+import { GetMyFeedResponseDto } from "./dto/response.dto";
 
 @ApiTags('User')
 @Controller('user')
@@ -29,21 +31,15 @@ export class UserController {
         type: CommonResponseDto
     })
     @Get('feed/:id')
-    async getMyFeed(@Param('id') id: number) {
-        const { data } = await this.httpService.axiosRef.get(`http://localhost:8081/video/image/${id}`);
+    async getMyFeed(@Param('id') id: number): Promise<GetMyFeedResponseDto> {
+        const { data }:{data: MyFeedDto []} 
+            = await this.httpService.axiosRef.get(`http://localhost:8081/video/image/${id}`);
         return {
             statusCode: 200,
-            message: 'OK',
+            message: 'OK 내 피드 성공적 조회',
             body: {
-                video: [
-                    {
-                        id: '1233423fajef',
-                        thumbNailPath: 'aws address'
-                    },
-                    {
-                        id: '123dfjasdjf',
-                        thumbNailPath: 'aws address'
-                    }
+                data: [
+                    ...data
                 ]
             }
         }
