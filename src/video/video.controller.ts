@@ -5,7 +5,9 @@ import { UploadFilesCommand } from "./command/upload-files.command";
 import { GetThumbNailPathResponseDto, GetVideoListResponseDto } from "./dto/response/video-request-response.dto";
 import { GetThumbNailPathQuery } from "./query/get-thumb-nail-path.query";
 import { GetVideoListQuery } from "./query/get-video-list.query";
-import { GetVideoPathQuery } from "./query/get-video-path.query";
+import { GetVideoDetailQuery } from "./query/get-video-detail.query";
+import { SaveVideoPathDto } from "./dto/save-video-path.dto";
+import { SaveVideoPathCommand } from "./command/save-video-path.command";
 
 @Controller('video')
 export class VideoController {
@@ -45,26 +47,26 @@ export class VideoController {
 
     /* 사용자 MyFeed 조회 */
     @Get(`image/:id`)
-    async getThumbNailPaths(@Param('id') userId: string):Promise<GetThumbNailPathResponseDto> {
-        const data = await this.queryBus.execute( new GetThumbNailPathQuery(userId) );
-        return {
-            statusCode: 200,
-            message: 'OK',
-            body: {
-                ...data
-            }
-        };
+    async getThumbNailPaths(@Param('id') userId: string):Promise<Document []> {
+        return await this.queryBus.execute( new GetThumbNailPathQuery(userId) );
     }
 
-    @Get(':videoId')
+    @Get('detail/:videoId')
     async streamingVideo(@Param('videoId') videoId: string): Promise<any> {
-        const videoPath = await this.queryBus.execute(new GetVideoPathQuery(videoId));
+        const videoInfo = await this.queryBus.execute(new GetVideoDetailQuery(videoId));
         return {
             statusCode: 200,
             message: 'OK',
             body: {
-                ...videoPath
+                ...videoInfo
             }
         }
+    }
+
+    /* 요약 영상 원하는 비디오 경로 저장 */
+    @Post('path')
+    async saveThumbNailPath(@Body() videoPathDto: SaveVideoPathDto) {
+        const { userId, videoPath } = videoPathDto;
+        await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
     }
 }
