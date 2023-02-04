@@ -44,8 +44,8 @@ export const GetHotVideoListPipeLine = [
 /* 썸네일 이미지 get 파이프라인 */
 export const GetThumbNailPathPipeLine = (userId: string) => {
     return [
-        { $match: { _id: new ObjectId(userId) } }, // 해당 user의 비디오만
-        { $sort: { uploadedAt: 1 } }, // 날짜 최신순
-        { $project: { _id: 1, thumbNailPath: 1 } }
+        { '$match': { 'owner': userId } }, // 해당 user의 비디오만
+        { '$sort': { 'uploadedAt': 1 } }, // 날짜 최신순
+        { '$project': { _id: 1, thumbNailPath: 1 } }
     ]
 }
