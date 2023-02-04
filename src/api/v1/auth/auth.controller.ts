@@ -39,9 +39,11 @@ export class AuthController {
     @Post('login')
     async login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
         const { phoneNumber, nickName } = loginRequestDto;
-        const { id } = await this.queryBus.execute(new FindUserByPhoneNumberQuery(phoneNumber));
+        const result = await this.queryBus.execute(new FindUserByPhoneNumberQuery(phoneNumber));
+        
         /* 로그인 성공 */
-        if (id) {
+        if (result) {
+            const { id } = result;
             const [ {data}, userInfo ] = await Promise.all([
                 /* 좋아요 service에 해당 user의 좋아요 list 요청 */
                 this.httpService.axiosRef.get(`http://localhost:8082/like/list/${id}`),
@@ -65,9 +67,20 @@ export class AuthController {
         /* 회원가입 */
         const uuid = User.createOrderedUuid();
         await this.commandBus.execute(new RegisterUserCommand(uuid, phoneNumber, nickName));
-        const user = await this.queryBus.execute(new GetUserInfoQuery(uuid));
-        return createResponse([
-            'login', 201, '회원가입 이후 로그인성공', user
-        ])
+        const [ {data}, userInfo ] = await Promise.all([
+            /* 좋아요 service에 해당 user의 좋아요 list 요청 */
+            this.httpService.axiosRef.get(`http://localhost:8082/like/list/${uuid}`),
+            this.queryBus.execute(new GetUserInfoQuery(uuid))
+        ]);
+        return {
+            statusCode: 200,
+            message: 'OK 새로운 회원 로그인',
+            body: {
+                user: {
+                    ...userInfo[0],
+                    likeList: [...data]
+                }
+            }
+        };
     }
 }
