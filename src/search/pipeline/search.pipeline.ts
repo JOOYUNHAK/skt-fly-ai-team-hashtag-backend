@@ -8,7 +8,9 @@ export const SearchVideoPipeline = (arg: string): Object[] => {
                     'path': ['tags', 'title'],
                     'synonyms': 'videoCollectionSynonyms'
                 }
-            },
+            }
+        },
+        {
             '$project': {
                 '_id': 1,
                 'nickName': 1,
@@ -17,14 +19,9 @@ export const SearchVideoPipeline = (arg: string): Object[] => {
                 'tags': 1,
                 'likeCount': 1,
                 'uploadedAt': {
-                    '$divide': [
-                        {
-                            '$subtract': [
-                                new Date().getTime(),
-                                '$uploadedAt'
-                            ]
-                        },
-                        1000
+                    '$subtract': [
+                        Date.now(),
+                        '$uploadedAt'
                     ]
                 }
             }
