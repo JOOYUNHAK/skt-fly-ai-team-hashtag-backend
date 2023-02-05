@@ -65,7 +65,7 @@ export class VideoController {
 
     /* 요약 영상 원하는 비디오 경로 저장 */
     @Post('path')
-    async saveThumbNailPath(@Body() videoPathDto: SaveVideoPathDto) {
+    async saveVideoPath(@Body() videoPathDto: SaveVideoPathDto) {
         const { userId, videoPath } = videoPathDto;
         await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
     }
