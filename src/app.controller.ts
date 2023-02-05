@@ -81,10 +81,10 @@ export class ApiGateway {
   }
 
   @Post('video/path')
-  async saveThumbNailPath(@Body() saveThumbNailPathDto: SaveVideoPathDto) {
+  async saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto) {
     try {
-      const { userId, thumbNailPath } = saveThumbNailPathDto;
-      await this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/image`, { userId, thumbNailPath });
+      const { userId, videoPath } = saveVideoPathDto;
+      await this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, videoPath });
       return {
         statusCode: 201,
         message: 'OK'
@@ -93,7 +93,7 @@ export class ApiGateway {
     catch(err) {
       console.log(err)
       throw new HttpException(
-        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video/image',
+        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video/path',
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     }
