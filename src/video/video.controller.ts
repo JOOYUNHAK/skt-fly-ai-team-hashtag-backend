@@ -52,13 +52,13 @@ export class VideoController {
     }
 
     @Get('detail/:videoId')
-    async streamingVideo(@Param('videoId') videoId: string): Promise<any> {
-        const videoInfo = await this.queryBus.execute(new GetVideoDetailQuery(videoId));
+    async getVideoDetail(@Param('videoId') videoId: string): Promise<any> {
+        const [videoInfo] = await this.queryBus.execute(new GetVideoDetailQuery(videoId));
         return {
             statusCode: 200,
             message: 'OK',
             body: {
-                ...videoInfo
+                detail: { ...videoInfo }
             }
         }
     }
