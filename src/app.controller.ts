@@ -5,6 +5,7 @@ import { PushLikeDto } from "./like-service/dto/like-service-request.dto";
 import { LoginRequestDto } from "./user-service/dto/user-service-requests.dto";
 import { LoginResponseDto } from "./user-service/dto/user-service-responses.dto";
 import { SaveVideoPathDto } from "./video-service/dto/save-video-path.dto";
+import { SaveVideoTitleDto } from "./video-service/save-video-title.dto";
 
 @Controller('api/v1')
 export class ApiGateway {
@@ -94,6 +95,22 @@ export class ApiGateway {
       console.log(err)
       throw new HttpException(
         '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video/path',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
+  }
+
+  @Post('video')
+  async saveVideoTitle(@Body() saveVideoTitleDto: SaveVideoTitleDto) {
+    try {
+      const { userId, title } = saveVideoTitleDto;
+      await this.httpService.axiosRef.post(`${this.baseUrl}:8081/video`,{ userId, title })
+      return;
+    }
+    catch(err) {
+      console.log(err)
+      throw new HttpException(
+        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video',
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     }
