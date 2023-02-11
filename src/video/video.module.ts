@@ -12,6 +12,7 @@ import { RedisModule } from "../redis/redis.module";
 import { SaveVideoPathCommandHandler } from "./command/save-video-path-command.handler";
 import { GetThumbNailPathQueryHandler } from "./query/get-thumb-nail-path-query.handler";
 import { HttpModule } from "@nestjs/axios";
+import { S3Provider } from "./provider/s3.provider";
 
 @Module({
     imports: [
@@ -31,7 +32,8 @@ import { HttpModule } from "@nestjs/axios";
         GetVideoDetailQueryHandler,
         GetThumbNailPathQueryHandler,
         GetVideoListQueryHandler,
-        SaveVideoPathCommandHandler
+        SaveVideoPathCommandHandler,
+        ...S3Provider
     ]
 })
 export class VideoModule {}
