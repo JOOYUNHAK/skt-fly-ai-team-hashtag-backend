@@ -13,6 +13,9 @@ import { SaveVideoPathCommandHandler } from "./command/save-video-path-command.h
 import { GetThumbNailPathQueryHandler } from "./query/get-thumb-nail-path-query.handler";
 import { HttpModule } from "@nestjs/axios";
 import { S3Provider } from "./provider/s3.provider";
+import { SaveAiResponseCommandHandler } from "./command/save-ai-response-command.handler";
+import { UploadCompleteVideoCommandHandler } from "./command/upload-complete-video-command.handler";
+import { GetTempVideoDataQueryHandler } from "./query/get-temp-video-data-query.handler";
 
 @Module({
     imports: [
@@ -33,6 +36,9 @@ import { S3Provider } from "./provider/s3.provider";
         GetThumbNailPathQueryHandler,
         GetVideoListQueryHandler,
         SaveVideoPathCommandHandler,
+        SaveAiResponseCommandHandler,
+        UploadCompleteVideoCommandHandler,
+        GetTempVideoDataQueryHandler,
         ...S3Provider
     ]
 })
