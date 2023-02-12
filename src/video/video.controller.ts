@@ -114,7 +114,7 @@ export class VideoController {
             user_ID: userId,
             video_image: thumbNailPath,
             video_path: videoPath,
-            video_tag: videoTag
+            video_tag: tags
         } = data;
 
         /* 해당 user의 http 연결 객체 */
@@ -167,9 +167,9 @@ export class VideoController {
             userId,
             thumbNailPath: "https://test-videodot-bucket.s3.ap-northeast-2.amazonaws.com/images/297F9E27-4B9C-4EF1-8443-DEF1132E5496.jpg",
             videoPath: 'https://test-videodot-bucket.s3.ap-northeast-2.amazonaws.com/videos/_talkv_wsKH0WhT1I_bfTKAHhz8Wb0HZ7Kc4KKk1_talkv_high.mp4',
-            videoTag
+            tags
         };
-        await this.commandBus.execute(new SaveAiResponseCommand(userId, thumbNailPath, videoPath, videoTag));
+        await this.commandBus.execute(new SaveAiResponseCommand(userId, thumbNailPath, videoPath, tags));
         sse.push(returnData); // event to client
 
         delete this.videoHash[userId]; // 해당 user의 연결 삭제
