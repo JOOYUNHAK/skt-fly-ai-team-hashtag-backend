@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Req, Res } from "@nestjs/common";
+import { Controller, Post, Get, Body, Param, Req, Res, Put } from "@nestjs/common";
 import { CommandBus, EventBus, QueryBus } from "@nestjs/cqrs";
 import { GetVideoListResponseDto } from "./dto/response/video-request-response.dto";
 import { GetThumbNailPathQuery } from "./query/get-thumb-nail-path.query";
@@ -19,6 +19,7 @@ import { ConfigService } from "@nestjs/config";
 import path from "path";
 import { SaveAiResponseCommand } from "./command/save-ai-response.command";
 import { UploadCompleteVideoCommand } from "./command/upload-complete-video.command";
+import { NotUploadVideoCommand } from "./command/not-upload-video.command";
 
 
 @Controller('video')
@@ -110,7 +111,7 @@ export class VideoController {
         }
         /* complete Event 신호가 들어왔을 때 */
         let { data } = payload;
-        const {
+        let {
             user_ID: userId,
             video_image: thumbNailPath,
             video_path: videoPath,
@@ -120,17 +121,19 @@ export class VideoController {
         /* 해당 user의 http 연결 객체 */
         const sse = this.videoHash[userId];
 
-        /* modify 2/11 */
-        /* s3 client create */
+        const REGION = this.configService.get('AWS.S3.REGION') // aws s3 region
+        const BUCKET = this.configService.get('AWS.S3.BUCKET');// aws s3 bucket
+
+        // s3 client 객체 생성
         const s3Client = new S3Client({
-            region: this.configService.get('AWS-S3-REGION'),
+            region: REGION,
             credentials: {
                 accessKeyId: this.configService.get('AWS.S3.ACCESS_KEY_ID'),
                 secretAccessKey: this.configService.get('AWS.S3.SECRET_ACCESS_KEY')
             }
         });
         /* 저장된 경로에서 파일들 읽기 */
-        let videoStream, thumbNailStream;
+        let videoStream: fs.ReadStream, thumbNailStream: fs.ReadStream;
         try {
             [videoStream, thumbNailStream] = await Promise.all([
                 fs.createReadStream(videoPath),
@@ -141,38 +144,38 @@ export class VideoController {
             console.log('createReadStream error...', err);
         };
 
-        const BUCKET = this.configService.get('AWS.S3.BUCKET');
+        const thumbNailKey = 'images/' + path.basename(thumbNailPath);
+        const videoKey = 'videos/' + path.basename(videoPath);
+
         const uploadImageParams = {
+            ACL: 'public-read',
             Bucket: BUCKET,
-            Key: 'image/' + path.basename(thumbNailPath),
+            Key: thumbNailKey,
             Body: thumbNailStream
         };
         const uploadVideoParams = {
+            ACL: 'public-read',
             Bucket: BUCKET,
-            Key: 'video/' + path.basename(videoPath),
+            Key: videoKey,
             Body: videoStream
         };
         /* s3에 upload */
         try {
-            const [videoUploadResult, thumbNailUploadResult] = await Promise.all([
+            await Promise.all([
                 s3Client.send(new PutObjectCommand(uploadVideoParams)),
                 s3Client.send(new PutObjectCommand(uploadImageParams))
             ]);
+            
+            thumbNailPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${thumbNailKey}`;
+            videoPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${videoKey}`;
+            
+            await this.commandBus.execute(new SaveAiResponseCommand(userId, thumbNailKey, videoKey, tags));
+            sse.push({ userId, thumbNailPath, videoPath, tags }); // event to client
+
+            delete this.videoHash[userId]; // 해당 user의 연결 삭제
         } catch (err) {
             console.log('error in aws return...', err);
         }
-        
-        /* @todo s3 return 값 받아서 클라이언트한테 전달해주기 */
-        const returnData = {
-            userId,
-            thumbNailPath: "https://test-videodot-bucket.s3.ap-northeast-2.amazonaws.com/images/297F9E27-4B9C-4EF1-8443-DEF1132E5496.jpg",
-            videoPath: 'https://test-videodot-bucket.s3.ap-northeast-2.amazonaws.com/videos/_talkv_wsKH0WhT1I_bfTKAHhz8Wb0HZ7Kc4KKk1_talkv_high.mp4',
-            tags
-        };
-        await this.commandBus.execute(new SaveAiResponseCommand(userId, thumbNailPath, videoPath, tags));
-        sse.push(returnData); // event to client
-
-        delete this.videoHash[userId]; // 해당 user의 연결 삭제
     }
 
     /* 요약된 영상 전체 업로드 */
@@ -180,5 +183,11 @@ export class VideoController {
     async uploadVideo(@Body() uploadVideoDto: UploadVideoDto) {
         const { userId, title } = uploadVideoDto;
         await this.commandBus.execute(new UploadCompleteVideoCommand(userId, title));
+    }
+
+    /* 요약된 정보 업로드 하지 않았을 때 */
+    @Put()
+    async notUploadVideo(@Body() userId: string) {
+        await this.commandBus.execute(new NotUploadVideoCommand(userId));
     }
 }
