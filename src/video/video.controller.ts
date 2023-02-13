@@ -112,6 +112,7 @@ export class VideoController {
         let { data } = payload;
         let {
             user_ID: userId,
+            nickname: nickName,
             video_image: thumbNailPath,
             video_path: videoPath,
             video_tag: tags
@@ -120,6 +121,7 @@ export class VideoController {
         /* 해당 user의 http 연결 객체 */
         const sse = this.videoHash[userId];
 
+        /* @todo s3객체 inject, bucket 밖으로 빼기 */
         const REGION = this.configService.get('AWS.S3.REGION') // aws s3 region
         const BUCKET = this.configService.get('AWS.S3.BUCKET');// aws s3 bucket
 
@@ -143,6 +145,7 @@ export class VideoController {
             console.log('createReadStream error...', err);
         };
 
+        /* s3에 올리기 위한 Key값들 */
         const thumbNailKey = 'images/' + path.basename(thumbNailPath);
         const videoKey = 'videos/' + path.basename(videoPath);
 
@@ -168,7 +171,7 @@ export class VideoController {
             thumbNailPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${thumbNailKey}`;
             videoPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${videoKey}`;
             
-            await this.commandBus.execute(new SaveAiResponseCommand(userId, thumbNailKey, videoKey, tags));
+            await this.commandBus.execute(new SaveAiResponseCommand(userId, nickName, thumbNailPath, videoPath, tags));
             sse.push({ userId, thumbNailPath, videoPath, tags }); // event to client
 
             delete this.videoHash[userId]; // 해당 user의 연결 삭제
