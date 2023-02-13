@@ -9,8 +9,10 @@ import { SaveVideoTitleDto } from "./video-service/save-video-title.dto";
 
 @Controller('api/v1')
 export class ApiGateway {
-  constructor(private readonly httpService: HttpService) { }
-  private readonly baseUrl = 'http://localhost';
+  constructor(
+    private readonly httpService: HttpService,
+    ) { }
+  private readonly baseUrl = 'http://52.78.122.30';
   /*
    * Service: User/Auth 
    * Router: User: user/ , Auth: auth/
@@ -85,7 +87,7 @@ export class ApiGateway {
   async saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto) {
     try {
       const { userId, videoPath } = saveVideoPathDto;
-      await this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, videoPath });
+      this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, videoPath })
       return {
         statusCode: 201,
         message: 'OK'
@@ -111,6 +113,21 @@ export class ApiGateway {
       console.log(err)
       throw new HttpException(
         '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
+  }
+
+  @Put('video')
+  async notUploadVideo(@Body('userId') userId: string) {
+    try {
+      await this.httpService.axiosRef.put(`${this.baseUrl}:8081/video`, { userId });
+      return;
+    }
+    catch(err) {
+      console.log(err)
+      throw new HttpException(
+        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video, put...',
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     }
