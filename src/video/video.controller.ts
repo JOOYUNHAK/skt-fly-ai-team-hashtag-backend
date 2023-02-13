@@ -12,11 +12,10 @@ import { HttpService } from "@nestjs/axios";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Request, Response } from "express";
 import { createSession } from "better-sse";
-import { ArriveCompleteEvent } from "./event/arrive-complete.event";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import * as fs from 'fs';
 import { ConfigService } from "@nestjs/config";
-import path from "path";
+import * as path from "path";
 import { SaveAiResponseCommand } from "./command/save-ai-response.command";
 import { UploadCompleteVideoCommand } from "./command/upload-complete-video.command";
 import { NotUploadVideoCommand } from "./command/not-upload-video.command";
@@ -83,11 +82,11 @@ export class VideoController {
     /* 요약 영상 원하는 비디오 경로 저장 */
     @Post('path')
     async saveVideoPath(@Body() saveVideoPathDto: SaveVideoPathDto,) {
-        const { userId, videoPath } = saveVideoPathDto;
+        const { userId, nickName, videoPath } = saveVideoPathDto;
         await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
         this.httpService
             .axiosRef
-            .post(`http://localhost:5000/video_summary`, { user_id: userId, video_origin_src: videoPath })
+            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
