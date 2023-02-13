@@ -86,8 +86,8 @@ export class ApiGateway {
   @Post('video/path')
   async saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto) {
     try {
-      const { userId, videoPath } = saveVideoPathDto;
-      this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, videoPath })
+      const { userId, nickName, videoPath } = saveVideoPathDto;
+      this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, nickName, videoPath })
       return {
         statusCode: 201,
         message: 'OK'
