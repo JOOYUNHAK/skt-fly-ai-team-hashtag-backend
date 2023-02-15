@@ -3,6 +3,6 @@ import { CommentModule } from './comment.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(CommentModule);
-  await app.listen(3000);
+  await app.listen(8084);
 }
 bootstrap();
