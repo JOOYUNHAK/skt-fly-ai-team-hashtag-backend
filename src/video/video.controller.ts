@@ -70,13 +70,7 @@ export class VideoController {
     @Get('detail/:videoId')
     async getVideoDetail(@Param('videoId') videoId: string): Promise<any> {
         const [videoInfo] = await this.queryBus.execute(new GetVideoDetailQuery(videoId));
-        return {
-            statusCode: 200,
-            message: 'OK',
-            body: {
-                detail: { ...videoInfo }
-            }
-        }
+        return videoInfo;
     }
 
     /* 요약 영상 원하는 비디오 경로 저장 */
