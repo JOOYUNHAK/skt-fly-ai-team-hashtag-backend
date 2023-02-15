@@ -1,10 +1,26 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs/dist';
+import { SaveCommentCommand } from './command/comment-service.command';
+import { SaveCommentDto } from './dto/comment-service.dto';
+import { GetVideoCommentsQuery } from './query/comment-service.query';
 
-@Controller()
+@Controller('video/comment')
 export class CommentController {
-  constructor() {}
+  constructor( 
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus 
+  ) {}
 
-  @Get()
-  getHello() {
+  @Post()
+  async saveComment(@Body() saveCommentDto: SaveCommentDto) {
+    const { videoId, userId, nickName, content } = saveCommentDto;
+    await this.commandBus.execute(new SaveCommentCommand(videoId, userId, nickName, content)); 
+  }
+
+  @Get('/:videoId')
+  async getVideoComments(@Param('videoId') videoId: string) {
+    const commentsData = await this.queryBus.execute(new GetVideoCommentsQuery(videoId));
+    console.log('commentsData = ....', commentsData);
   }
 }
+ 
