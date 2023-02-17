@@ -18,6 +18,7 @@ import { GetTempVideoDataQueryHandler } from "./query/get-temp-video-data-query.
 import { NotUploadVideoCommandHandler } from "./command/not-upload-video-command.handler";
 import { EventEmitterModule } from "@nestjs/event-emitter";
 import { UploadVideoCompleteEventHandler } from "./event/upload-video-complete-event.handler";
+import { CommunicationErrorAiEventHandler } from "./event/communication-error-ai-event.handler";
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { UploadVideoCompleteEventHandler } from "./event/upload-video-complete-e
         GetTempVideoDataQueryHandler,
         NotUploadVideoCommandHandler,
         UploadVideoCompleteEventHandler,
+        CommunicationErrorAiEventHandler,
         ...S3Provider
     ]
 })

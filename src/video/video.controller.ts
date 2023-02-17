@@ -19,6 +19,7 @@ import * as path from "path";
 import { SaveAiResponseCommand } from "./command/save-ai-response.command";
 import { UploadCompleteVideoCommand } from "./command/upload-complete-video.command";
 import { NotUploadVideoCommand } from "./command/not-upload-video.command";
+import { CommunicationErrorAiEvent } from "./event/communication-error-ai.event";
 
 
 @Controller('video')
@@ -76,18 +77,19 @@ export class VideoController {
     /* 요약 영상 원하는 비디오 경로 저장 */
     @Post('path')
     async saveVideoPath(@Body() saveVideoPathDto: SaveVideoPathDto,) {
-        const { userId, nickName, videoPath } = saveVideoPathDto;
+        const { userId, nickName, videoPath, category } = saveVideoPathDto;
         await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
         this.httpService
             .axiosRef
-            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath })
+            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
                 /* 영상 요약 완료되면 이벤트 전달 */
-                this.eventEmitter.emit('complete', { data: responseData });
+                this.eventEmitter.emit('complete', { data: { ...responseData, category } }); // category 항목도 추가
             })
             .catch((err) => {
+                this.eventEmitter.emit('communication_error_ai', { userId });
                 console.log('ai 팀과 통신하지 못했어요...', err);
             })
     }
@@ -173,6 +175,18 @@ export class VideoController {
             console.log('error in aws return...', err);
         }
     }
+    
+    /* Ai 팀과 통신 오류 났을 때 */
+    @OnEvent('communication_error_ai')    
+    serverErrorAiTeam( payload: { userId:string }) {
+        const { userId } = payload;
+        /* 해당 user의 http 연결 객체 */
+        const sse = this.videoHash[userId];
+        sse.push('SERVER_ERROR'); // event to client
+        delete this.videoHash[userId]; // 해당 user의 연결 삭제
+        /* 실패했다는 Event -> Redis temp data 삭제 */
+        this.eventBus.publish(new CommunicationErrorAiEvent(userId));
+    }
 
     /* 요약된 영상 전체 업로드 */
     @Post()
@@ -184,6 +198,7 @@ export class VideoController {
     /* 요약된 정보 업로드 하지 않았을 때 */
     @Put()
     async notUploadVideo(@Body() userId: string) {
-        await this.commandBus.execute(new NotUploadVideoCommand(userId));
+        return;
+        //await this.commandBus.execute(new NotUploadVideoCommand(userId)); // 테스트용 위해
     }
 }
