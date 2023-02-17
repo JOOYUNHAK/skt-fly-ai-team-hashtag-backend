@@ -13,7 +13,7 @@ export class ApiGateway {
   constructor(
     private readonly httpService: HttpService,
   ) { }
-  private readonly baseUrl = 'http://52.78.122.30';
+  private readonly baseUrl = 'http://127.0.0.1';
   /*
    * Service: User/Auth 
    * Router: User: user/ , Auth: auth/
@@ -146,6 +146,25 @@ export class ApiGateway {
       console.log(err)
       throw new HttpException(
         '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> video, put...',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      )
+    }
+  }
+
+  @Post('test/video/path')
+  async testVideoPathRouter(@Body() testDto: any) {
+    try {
+      const { userId, nickName, videoPath, category } = testDto;
+      this.httpService.axiosRef.post(`${this.baseUrl}:8081/video/path`, { userId, nickName, videoPath, category })
+      return {
+        statusCode: 201,
+        message: 'OK'
+      }
+    }
+    catch (err) {
+      console.log(err)
+      throw new HttpException(
+        '죄송해요 비디오 서버에 문제가 생겨 복구중이에요... router -> test/video/path',
         HttpStatus.INTERNAL_SERVER_ERROR
       )
     }
