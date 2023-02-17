@@ -14,7 +14,8 @@ export class SaveAiResponseCommandHandler implements ICommandHandler<SaveAiRespo
     async execute(command: SaveAiResponseCommand): Promise<any> {
         const { userId, nickName, thumbNailPath, videoPath, tags } = command;
         const originVideoPath = await this.redis.HGET('process:video:list', `user:${userId}`);
+        console.log('originVideoPath.........->', originVideoPath)
         const tempVideoDataExceptTitle = JSON.stringify({ userId, nickName, thumbNailPath, videoPath, tags, originVideoPath });
         await this.redis.HSET('process:video:list', `user:${userId}`, tempVideoDataExceptTitle);
     }
-}
+}       
