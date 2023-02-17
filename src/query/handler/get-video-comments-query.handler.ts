@@ -11,9 +11,10 @@ export class GetVideoCommentsQueryHandler implements IQueryHandler<GetVideoComme
         private readonly mongoDb: Db
     ) {}
     async execute(query: GetVideoCommentsQuery): Promise<any> {
+        const { videoId } = query;
         return await this.mongoDb
             .collection('comment')
-            .aggregate(GetVideoCommentsPipeLine)
+            .aggregate(GetVideoCommentsPipeLine(videoId))
             .toArray();
     }
 }

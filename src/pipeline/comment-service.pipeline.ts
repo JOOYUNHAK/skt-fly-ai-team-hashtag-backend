@@ -1,4 +1,5 @@
-export const GetVideoCommentsPipeLine = [
+export const GetVideoCommentsPipeLine = (videoId: string) => [
+    { "$match": { 'videoId': videoId}},
     {
         "$project": {
             "_id": 1,
