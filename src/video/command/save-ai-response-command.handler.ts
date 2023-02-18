@@ -12,10 +12,10 @@ export class SaveAiResponseCommandHandler implements ICommandHandler<SaveAiRespo
 
     /* 요약된 영상 제목 입력 받기 전 임시 데이터 합쳐서 저장 */
     async execute(command: SaveAiResponseCommand): Promise<any> {
-        const { userId, nickName, thumbNailPath, videoPath, tags } = command;
+        const { userId, nickName, thumbNailPath, videoPath, tags, category } = command;
         const originVideoPath = await this.redis.HGET('process:video:list', `user:${userId}`);
         console.log('originVideoPath.........->', originVideoPath)
-        const tempVideoDataExceptTitle = JSON.stringify({ userId, nickName, thumbNailPath, videoPath, tags, originVideoPath });
+        const tempVideoDataExceptTitle = JSON.stringify({ userId, nickName, thumbNailPath, videoPath, tags, category, originVideoPath });
         await this.redis.HSET('process:video:list', `user:${userId}`, tempVideoDataExceptTitle);
     }
 }       

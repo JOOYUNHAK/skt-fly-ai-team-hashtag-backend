@@ -6,6 +6,7 @@ export class SaveAiResponseCommand implements ICommand {
         public readonly nickName: string,
         public readonly thumbNailPath: string,
         public readonly videoPath: string,
-        public readonly tags: string []
+        public readonly tags: string [],
+        public readonly category: string[]
     ) {}
 }
