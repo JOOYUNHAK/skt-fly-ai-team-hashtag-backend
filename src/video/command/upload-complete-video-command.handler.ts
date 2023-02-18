@@ -19,7 +19,7 @@ export class UploadCompleteVideoCommandHandler implements ICommandHandler<Upload
     async execute(command: UploadCompleteVideoCommand): Promise<any> {
         const { userId, title } = command;
         let tempVideoData = await this.queryBus.execute(new GetTempVideoDataQuery(userId));
-        const { originVideoPath } = tempVideoData;
+        const { thumbNailPath, videoPath, originVideoPath } = tempVideoData;
         delete tempVideoData['originVideoPath']; //원본 경로 삭제
         // 완료된 동영상 몽고 db에 저장
         await this.db
@@ -27,6 +27,6 @@ export class UploadCompleteVideoCommandHandler implements ICommandHandler<Upload
             .insertOne({...tempVideoData, title, likeCount: 0, uploadedAt: Date.now()});
         // redis temp video data 삭제
         await this.redis.HDEL('process:video:list', `user:${userId}`);
-        //this.eventBus.publish(new UploadVideoCompleteEvent(originVideoPath)); // 수정 테스트용 위해서 
+        //this.eventBus.publish(new UploadVideoCompleteEvent(thumbNailPath, videoPath, originVideoPath)); // 수정 테스트용 위해서 
     }
 }
