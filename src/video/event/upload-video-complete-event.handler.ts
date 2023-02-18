@@ -12,8 +12,9 @@ export class UploadVideoCompleteEventHandler implements IEventHandler<UploadVide
         @Inject('S3_CLIENT')
         private readonly s3Client: S3Client,
         private readonly configService: ConfigService,
-        private originVideoPaths: { Bucket: string, Key: string } [] // delete command array
     ) {}
+
+    private originVideoPaths: { Bucket: string, Key: string } [] // delete command array
     
     async handle(event: UploadVideoCompleteEvent) {
         const BUCKET = this.configService.get('AWS.S3.BUCKET');

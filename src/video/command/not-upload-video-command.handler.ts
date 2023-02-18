@@ -14,8 +14,9 @@ export class NotUploadVideoCommandHandler implements ICommandHandler<NotUploadVi
         @Inject('S3_CLIENT')
         private readonly s3Client: S3Client,
         private readonly configService: ConfigService,
-        private deleteCommandArray: { Bucket: string, Key: string }[]
     ) {}
+    
+    private deleteCommandArray: { Bucket: string, Key: string }[]
 
     async execute(command: NotUploadVideoCommand): Promise<any> {
         const { userId } = command;
