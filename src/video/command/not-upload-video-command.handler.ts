@@ -5,7 +5,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import AmazonS3URI from "amazon-s3-uri";
 import { RedisClientType } from "redis";
 import { NotUploadVideoCommand } from "./not-upload-video.command";
-
+import { unlink } from 'node:fs';
 @CommandHandler(NotUploadVideoCommand)
 export class NotUploadVideoCommandHandler implements ICommandHandler<NotUploadVideoCommand> {
     constructor(
@@ -13,39 +13,37 @@ export class NotUploadVideoCommandHandler implements ICommandHandler<NotUploadVi
         private readonly redis: RedisClientType,
         @Inject('S3_CLIENT')
         private readonly s3Client: S3Client,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private deleteCommandArray: { Bucket: string, Key: string }[]
     ) {}
 
     async execute(command: NotUploadVideoCommand): Promise<any> {
         const { userId } = command;
         const field = `user:${userId}`;
+        const BUCKET = this.configService.get('AWS.S3.BUCKET');
         const { thumbNailPath, videoPath, originVideoPath } = JSON.parse( await this.redis.HGET('process:video:list', field) );
         await this.redis.HDEL('process:video:list', `user:${userId}`);
-        const BUCKET = this.configService.get('AWS.S3.BUCKET');
+        const pathArray: string[] = [ thumbNailPath, videoPath, ...originVideoPath ]; // 삭제하려는 경로들 배열로
 
-        const { key: thumbNailKey } = AmazonS3URI(thumbNailPath);
-        const { key: videoKey } = AmazonS3URI(videoPath);
-        const { key: originKey } = AmazonS3URI(originVideoPath);
-
-        const thumbNailBucketParams = { 
-            Bucket: BUCKET,
-            Key: thumbNailKey
-         };
-        const videoBucketParams = {
-            Bucket: BUCKET,
-            Key: videoKey
-        };
-        const originBucketParams = {
-            Bucket: BUCKET,
-            Key: originKey
-        };
-
+        /* 각 경로 별 delete command array에 추가 */
+        pathArray.map((path) => {
+            const { key } = AmazonS3URI(path);
+            this.deleteCommandArray.push({ Bucket: BUCKET, Key: key});
+        });
         try {
-            await Promise.all([
-                this.s3Client.send(new DeleteObjectCommand(thumbNailBucketParams)),
-                this.s3Client.send(new DeleteObjectCommand(videoBucketParams)),
-                this.s3Client.send(new DeleteObjectCommand(originBucketParams))
-            ]);
+            /* 삭제할 경로들 전부 삭제 */ 
+            await Promise.all(
+                this.deleteCommandArray.map((path, index) => {
+                    if( index <= 1 ) {
+                        const { Key } = path;
+                        /* ai팀과 공통으로 쓰는 folder에 저장된 파일 삭제 */
+                        unlink( `/home/ubuntu/${Key}`, (err) => console.log(
+                            'unlink error in notUploadVideoCommand...', err)
+                        );                                              
+                    }
+                    this.s3Client.send( new DeleteObjectCommand(path) )
+                })
+            );
         }
         catch(err) {
             console.log('delete bucket error in NotUploadVideoCommand....', err);
