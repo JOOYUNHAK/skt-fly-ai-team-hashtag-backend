@@ -172,7 +172,7 @@ export class VideoController {
             videoPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${videoKey}`;
             
             await this.commandBus.execute(new SaveAiResponseCommand(userId, nickName, thumbNailPath, videoPath, tags, category));
-            sse.push({ userId, thumbNailPath, videoPath, tags }); // event to client
+            sse.push({ userId, nickName, thumbNailPath, videoPath, tags }); // event to client
 
             delete this.videoHash[userId]; // 해당 user의 연결 삭제
         } catch (err) {
