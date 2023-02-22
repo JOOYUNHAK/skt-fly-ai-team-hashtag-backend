@@ -30,9 +30,10 @@ export class VideoController {
         private readonly httpService: HttpService,
         private readonly eventBus: EventBus,
         private readonly configService: ConfigService,
-        private eventEmitter: EventEmitter2
+       private eventEmitter: EventEmitter2,
     ) { }
     private videoHash: Object = {};
+    private readonly categoryLabel = ['가족', '스터디', '뷰티', '반려동물', '운동/스포츠', '음식', '여행', '연애/결혼', '문화생활', '직장인'];
     /* @Post()
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'video', maxCount: 1 },
@@ -77,11 +78,13 @@ export class VideoController {
     /* 요약 영상 원하는 비디오 경로 저장 */
     @Post('path')
     async saveVideoPath(@Body() saveVideoPathDto: SaveVideoPathDto,) {
+        const label = [];
         const { userId, nickName, videoPath, category } = saveVideoPathDto;
         await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
+        category.map((eachCategory) => label.push( this.categoryLabel.indexOf(eachCategory) ));
         this.httpService
             .axiosRef
-            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category })
+            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, label  })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
