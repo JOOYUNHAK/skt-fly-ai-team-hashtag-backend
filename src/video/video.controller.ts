@@ -30,7 +30,7 @@ export class VideoController {
         private readonly httpService: HttpService,
         private readonly eventBus: EventBus,
         private readonly configService: ConfigService,
-       private eventEmitter: EventEmitter2,
+        private eventEmitter: EventEmitter2,
     ) { }
     private videoHash: Object = {};
     private readonly categoryLabel = ['가족', '스터디', '뷰티', '반려동물', '운동/스포츠', '음식', '여행', '연애/결혼', '문화생활', '직장인'];
@@ -84,7 +84,7 @@ export class VideoController {
         category.map((eachCategory) => label.push( this.categoryLabel.indexOf(eachCategory) ));
         this.httpService
             .axiosRef
-            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, label  })
+            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label  })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
