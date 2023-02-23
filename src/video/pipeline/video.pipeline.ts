@@ -1,24 +1,24 @@
 import { ObjectId } from "mongodb";
 
 /* 최신 비디오 순 파이프라인 */
-export const GetRecentVideoListPipeLine = [
+export const GetRecentVideoListPipeLine = () => [
     {
-        "$project": {
-            "_id": 1,
-            "nickName": 1,
-            "thumbNailPath": 1,
-            "title": 1,
-            "tags": 1,
-            "likeCount": 1,
-            "uploadedAt": {
-                "$subtract": [
-                    Date.now(),
-                    "$uploadedAt"
+        '$project': {
+            '_id': 1,
+            'nickName': 1,
+            'thumbNailPath': 1,
+            'title': 1,
+            'tags': 1,
+            'likeCount': 1,
+            'uploadedAt': {
+                '$subtract': [
+		    Date.now(),
+                    '$uploadedAt'
                 ]
-            }
+            },
         }
     },
-    { "$sort": { "uploadedAt": 1 } }
+    { '$sort': { 'uploadedAt': 1 } }
 ];
 
 /* 인기 비디오 순 파이프라인 */

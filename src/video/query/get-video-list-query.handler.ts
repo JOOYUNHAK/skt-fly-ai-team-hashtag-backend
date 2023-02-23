@@ -15,7 +15,7 @@ export class GetVideoListQueryHandler implements IQueryHandler<GetVideoListQuery
             /* 최신 비디오 */ 
             this.db
                 .collection('video')
-                .aggregate(GetRecentVideoListPipeLine)
+                .aggregate(GetRecentVideoListPipeLine())
                 //.sort({ uploadedAt: 1 })
                 .toArray(),
             /* 좋아요 순 비디오 */
