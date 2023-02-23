@@ -1,13 +1,12 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ApiGateway } from './app.controller';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
-    HttpModule.register({
-      timeout: 3000,
-      maxRedirects: 3
-    })
+    HttpModule,
+    EventEmitterModule.forRoot()
   ],
   controllers: [ApiGateway],
   providers: [],
