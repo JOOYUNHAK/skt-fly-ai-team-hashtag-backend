@@ -25,6 +25,7 @@ export const SearchVideoPipeline = (arg: string): Object[] => {
                     ]
                 }
             }
-        }
+        },
+        { '$sort': { 'uploadedAt': 1 } }
     ];
 }
