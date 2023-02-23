@@ -61,7 +61,7 @@ export const GetVideoDetailPipeLine = (videoId: string) => {
 export const GetThumbNailPathPipeLine = (userId: string) => {
     return [
         { '$match': { 'userId': userId } }, // 해당 user의 비디오만
-        { '$sort': { 'uploadedAt': 1 } }, // 날짜 최신순
+        { '$sort': { 'uploadedAt': -1 } }, // 날짜 최신순
         { '$project': { '_id': 1, 'thumbNailPath': 1 } }
     ]
 }
