@@ -31,9 +31,10 @@ export class UserController {
         type: CommonResponseDto
     })
     @Get('feed/:id')
-    async getMyFeed(@Param('id') id: number): Promise<GetMyFeedResponseDto> {
+    async getMyFeed(@Param('id') id: string): Promise<GetMyFeedResponseDto> {
+	    console.log(id)
         const { data }:{data: MyFeedDto []} 
-            = await this.httpService.axiosRef.get(`http://localhost:8081/video/image/${id}`);
+            = await this.httpService.axiosRef.get(`http://172.18.10.6:8081/video/image/${id}`);
         return {
             statusCode: 200,
             message: 'OK 내 피드 성공적 조회',

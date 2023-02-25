@@ -46,7 +46,7 @@ export class AuthController {
             const { id } = result;
             const [ {data}, userInfo ] = await Promise.all([
                 /* 좋아요 service에 해당 user의 좋아요 list 요청 */
-                this.httpService.axiosRef.get(`http://localhost:8082/like/list/${id}`),
+                this.httpService.axiosRef.get(`http://172.18.10.7:8082/like/list/${id}`),
                 this.queryBus.execute(new GetUserInfoQuery(id))
             ]);
             return {
@@ -69,7 +69,7 @@ export class AuthController {
         await this.commandBus.execute(new RegisterUserCommand(uuid, phoneNumber, nickName));
         const [ {data}, userInfo ] = await Promise.all([
             /* 좋아요 service에 해당 user의 좋아요 list 요청 */
-            this.httpService.axiosRef.get(`http://localhost:8082/like/list/${uuid}`),
+            this.httpService.axiosRef.get(`http://172.18.10.7:8082/like/list/${uuid}`),
             this.queryBus.execute(new GetUserInfoQuery(uuid))
         ]);
         return {
