@@ -84,7 +84,7 @@ export class VideoController {
         category.map((eachCategory) => label.push( this.categoryLabel.indexOf(eachCategory) ));
         this.httpService
             .axiosRef
-            .post(`http://localhost:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label  })
+            .post(`http://52.78.122.30:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label  })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
@@ -134,7 +134,9 @@ export class VideoController {
             }
         });
         /* 저장된 경로에서 파일들 읽기 */
-        let videoStream: fs.ReadStream, thumbNailStream: fs.ReadStream;
+        let videoStream: fs.ReadStream;
+        let thumbNailStream: fs.ReadStream;
+            console.log('before read createreadstream......')
         try {
             [videoStream, thumbNailStream] = await Promise.all([
                 fs.createReadStream(videoPath),
