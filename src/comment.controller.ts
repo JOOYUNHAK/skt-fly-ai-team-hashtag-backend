@@ -14,13 +14,13 @@ export class CommentController {
   @Post()
   async saveComment(@Body() saveCommentDto: SaveCommentDto) {
     const { videoId, userId, nickName, content } = saveCommentDto;
+    console.log('save comment request....');
     await this.commandBus.execute(new SaveCommentCommand(videoId, userId, nickName, content)); 
   }
 
   @Get('/:videoId')
   async getVideoComments(@Param('videoId') videoId: string) {
-    const commentsData = await this.queryBus.execute(new GetVideoCommentsQuery(videoId));
-    console.log('commentsData = ....', commentsData);
+    return await this.queryBus.execute(new GetVideoCommentsQuery(videoId));
   }
 }
  
