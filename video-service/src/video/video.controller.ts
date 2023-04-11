@@ -204,7 +204,6 @@ export class VideoController {
     /* 요약된 정보 업로드 하지 않았을 때 */
     @Put()
     async notUploadVideo(@Body() userId: string) {
-        return;
-        //await this.commandBus.execute(new NotUploadVideoCommand(userId)); // 테스트용 위해
+        await this.commandBus.execute(new NotUploadVideoCommand(userId));
     }
 }

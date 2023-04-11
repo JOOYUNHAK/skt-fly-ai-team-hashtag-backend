@@ -27,6 +27,6 @@ export class UploadCompleteVideoCommandHandler implements ICommandHandler<Upload
             .insertOne({...tempVideoData, title, likeCount: 0, uploadedAt: Date.now()});
         // redis temp video data 삭제
         await this.redis.HDEL('process:video:list', `user:${userId}`);
-        //this.eventBus.publish(new UploadVideoCompleteEvent(thumbNailPath, videoPath, originVideoPath)); // 수정 테스트용 위해서 
+        this.eventBus.publish(new UploadVideoCompleteEvent(thumbNailPath, videoPath, originVideoPath));
     }
 }
