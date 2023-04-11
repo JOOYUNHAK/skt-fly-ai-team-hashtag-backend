@@ -51,8 +51,6 @@ services:
                 ipv4_address: 172.18.10.4
         ports:
             - "8000:8000"
-        volumes:
-            - ./api-gateway:/home/ubuntu/video-dot-project/api-gateway
         restart: on-failure:3
 # user service
     user-service:
@@ -68,8 +66,6 @@ services:
                 ipv4_address: 172.18.10.5
         expose:
             - 8080
-        volumes:
-            - ./user-service:/home/ubuntu/video-dot-project/user-service
         restart: on-failure:3
 # video service
     video-service:
@@ -86,7 +82,6 @@ services:
         ports:
             - "8081:8081"
         volumes:
-            - ./video-service:/home/ubuntu/video-dot-project/video-service
             - ../output:/home/ubuntu/output
         restart: on-failure:3
 # like service
@@ -103,8 +98,6 @@ services:
                 ipv4_address: 172.18.10.7
         expose:
             - 8082
-        volumes:
-            - ./like-service:/home/ubuntu/video-dot-project/like-service
         restart: on-failure:3
 # search service
     search-service:
@@ -118,8 +111,6 @@ services:
                 ipv4_address: 172.18.10.8
         expose:
             - 8083
-        volumes:
-            - ./search-service:/home/ubuntu/video-dot-project/search-service
         restart: on-failure:3
 # comment service
     comment-service:
@@ -133,8 +124,6 @@ services:
                 ipv4_address: 172.18.10.9
         expose:
             - 8084
-        volumes:
-            - ./comment-service:/home/ubuntu/video-dot-project/comment-service
         restart: on-failure:3
 networks:
     back-tier:
