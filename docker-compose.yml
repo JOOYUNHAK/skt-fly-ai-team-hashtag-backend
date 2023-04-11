@@ -1,0 +1,144 @@
+version: "3.9"
+services:
+# redis service
+    redis:
+        image: redis:7.0.8
+        container_name: redis-container
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.11
+        volumes:
+            - /var/lib/redis:/var/lib/redis
+        ports:
+            - "6379:6379"
+        restart: on-failure:3
+        #healthcheck:
+        #   test: ["CMD-SHELL", "netstat -an | grep -q 6379"]
+# mysql service
+    mysql:
+        image: mysql:8.0.32
+        container_name: mysql-container
+        environment:
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=1234
+            - MYSQL_ROOT_PASSWORD=1234
+            - MYSQL_DATABASE=video_dot
+            - TZ=Asia/Seoul
+            - PUID=1000
+            - PGID=1000
+        volumes:
+                - /var/lib/mysql:/var/lib/mysql
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.10
+        ports:
+            - "3306:3306"
+        restart: on-failure:3
+        #healthcheck:
+        #    test: ["CMD-SHELL", "netstat -an | grep -q 3306"]
+# api gateway
+    api-gateway:
+        image: "wndbsgkr/video-dot-project:api-gateway"
+        container_name: api-gateway
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.4
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./api-gateway:/home/ubuntu/video-dot-project/api-gateway
+        restart: on-failure:3
+# user service
+    user-service:
+        depends_on:
+            - mysql
+        container_name: user-service
+        image: "wndbsgkr/video-dot-project:user-service"
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.5
+        expose:
+            - 8080
+        volumes:
+            - ./user-service:/home/ubuntu/video-dot-project/user-service
+        restart: on-failure:3
+# video service
+    video-service:
+        depends_on:
+            - redis
+        container_name: video-service
+        image: "wndbsgkr/video-dot-project:video-service"
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.6
+        ports:
+            - "8081:8081"
+        volumes:
+            - ./video-service:/home/ubuntu/video-dot-project/video-service
+            - ../output:/home/ubuntu/output
+        restart: on-failure:3
+# like service
+    like-service:
+        depends_on:
+            - redis
+        container_name: like-service
+        image: "wndbsgkr/video-dot-project:like-service"
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.7
+        expose:
+            - 8082
+        volumes:
+            - ./like-service:/home/ubuntu/video-dot-project/like-service
+        restart: on-failure:3
+# search service
+    search-service:
+        image: "wndbsgkr/video-dot-project:search-service"
+        container_name: search-service
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.8
+        expose:
+            - 8083
+        volumes:
+            - ./search-service:/home/ubuntu/video-dot-project/search-service
+        restart: on-failure:3
+# comment service
+    comment-service:
+        image: "wndbsgkr/video-dot-project:comment-service"
+        container_name: comment-service
+        environment:
+            - PUID=1000
+            - PGID=1000
+        networks:
+            back-tier:
+                ipv4_address: 172.18.10.9
+        expose:
+            - 8084
+        volumes:
+            - ./comment-service:/home/ubuntu/video-dot-project/comment-service
+        restart: on-failure:3
+networks:
+    back-tier:
+        ipam:
+            driver: default
+            config:
+                - subnet: "172.18.10.0/24"
