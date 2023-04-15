@@ -1,5 +1,6 @@
 import { HttpService } from "@nestjs/axios";
 import { Body, Controller, Get, Param, Post, Put, Query, HttpException, HttpStatus } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { AxiosResponse } from "axios";
 import { SaveCommentDto } from "./comment-service/dto/comment-service.dto";
 import { PushLikeDto } from "./like-service/dto/like-service-request.dto";
@@ -12,8 +13,15 @@ import { SaveVideoTitleDto } from "./video-service/save-video-title.dto";
 export class ApiGateway {
   constructor(
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService
   ) { }
-  private readonly baseUrl = 'http://127.0.0.1';
+
+    private readonly USER_SERVICE: string = this.configService.get('docker.user_service'); 
+    private readonly LIKE_SERVICE: string = this.configService.get('docker.like_service');
+    private readonly SEARCH_SERVICE: string = this.configService.get('docker.search_service');
+    private readonly VIDEO_SERVICE: string = this.configService.get('docker.video_service');
+    private readonly COMMENT_SERVICE: string = this.configService.get('docker.comment_service');
+
   /*
    * Service: User/Auth 
    * Router: User: user/ , Auth: auth/
@@ -22,8 +30,9 @@ export class ApiGateway {
   @Get('user/feed/:id')
   async getMyFeedRequest(@Param('id') id: string): Promise<any> {
     try {
-      const { data } = await this.httpService.axiosRef.get(`http://172.18.10.5:8080/user/feed/${id}`);
-      return data;
+      //const { data } = await this.httpService.axiosRef.get(`${this.USER_SERVICE}/user/feed/${id}`);
+      //return data;
+      return { data: [ { videoId: '102', thumbNailPath: "aws path" }, { videoId: "19232", thumbNailPath: "aws apth" } ]};
     }
     catch (err) {
       throw new HttpException(
@@ -37,7 +46,7 @@ export class ApiGateway {
   async loginRequest(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto | void> {
     try {
       const { phoneNumber, nickName } = loginRequestDto;
-      const { data } = await this.httpService.axiosRef.post(`http://172.18.10.5:8080/auth/login`, { phoneNumber, nickName });
+      const { data } = await this.httpService.axiosRef.post(`${this.USER_SERVICE}/auth/login`, { phoneNumber, nickName });
       return data;
     }
     catch (err) {
@@ -57,7 +66,7 @@ export class ApiGateway {
   @Get('video/list')
   async videoListRequest(): Promise<AxiosResponse<any>> {
     try {
-      const { data } = await this.httpService.axiosRef.get(`http://172.18.10.6:8081/video/list`);
+      const { data } = await this.httpService.axiosRef.get(`${this.VIDEO_SERVICE}/video/list`);
       return data;
     }
     catch (err) {
@@ -74,8 +83,8 @@ export class ApiGateway {
 	  console.log(videoId)
     try {
       const [videoInfoData, videoCommentData] = await Promise.all([
-        this.httpService.axiosRef.get(`http://172.18.10.6:8081/video/detail/${videoId}`),
-        this.httpService.axiosRef.get(`http://172.18.10.9:8084/video/comment/${videoId}`)
+        this.httpService.axiosRef.get(`${this.VIDEO_SERVICE}/video/detail/${videoId}`),
+        this.httpService.axiosRef.get(`${this.COMMENT_SERVICE}/video/comment/${videoId}`)
       ])
       const { data: videoInfoResponseData } = videoInfoData;
       const { data: videoCommentsResponseData } = videoCommentData;
@@ -105,7 +114,7 @@ export class ApiGateway {
   async saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto) {
     try {
       const { userId, nickName, videoPath } = saveVideoPathDto;
-      this.httpService.axiosRef.post(`http://172.18.10.6:8081/video/path`, { userId, nickName, videoPath })
+      this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath })
       return {
         statusCode: 201,
         message: 'OK'
@@ -124,7 +133,7 @@ export class ApiGateway {
   async saveVideoTitle(@Body() saveVideoTitleDto: SaveVideoTitleDto) {
     try {
       const { userId, title } = saveVideoTitleDto;
-      await this.httpService.axiosRef.post(`http://172.18.10.6:8081/video`, { userId, title })
+      await this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}:8081/video`, { userId, title })
       return;
     }
     catch (err) {
@@ -139,7 +148,7 @@ export class ApiGateway {
   @Put('video')
   async notUploadVideo(@Body('userId') userId: string) {
     try {
-      await this.httpService.axiosRef.put(`http://172.18.10.6:8081/video`, { userId });
+      await this.httpService.axiosRef.put(`${this.VIDEO_SERVICE}/video`, { userId });
       return;
     }
     catch (err) {
@@ -155,7 +164,7 @@ export class ApiGateway {
   async testVideoPathRouter(@Body() testDto: any) {
     try {
       const { userId, nickName, videoPath, category } = testDto;
-      this.httpService.axiosRef.post(`http://172.18.10.6:8081/video/path`, { userId, nickName, videoPath, category })
+      this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath, category })
       return {
         statusCode: 201,
         message: 'OK'
@@ -179,7 +188,7 @@ export class ApiGateway {
   async pushLikeRequest(@Body() pushLikeDto: PushLikeDto): Promise<void> {
     try {
       const { userId, videoId } = pushLikeDto;
-      await this.httpService.axiosRef.put(`http://172.18.10.7:8082/like`, { userId, videoId });
+      await this.httpService.axiosRef.put(`${this.LIKE_SERVICE}/like`, { userId, videoId });
     }
     catch (err) {
       console.log(err)
@@ -198,7 +207,7 @@ export class ApiGateway {
   @Get('search/video')
   async searchVideoRequest(@Query('keyword') keyword: string) {
     try {
-      const { data } = await this.httpService.axiosRef.get(`http://172.18.10.8:8083/search/video`, { params: { keyword } });
+      const { data } = await this.httpService.axiosRef.get(`${this.SEARCH_SERVICE}/search/video`, { params: { keyword } });
       return {
         statusCode: 200,
         message: 'OK',
@@ -227,7 +236,7 @@ export class ApiGateway {
   async saveComment(@Body() saveCommentDto: SaveCommentDto) {
     try {
       const { videoId, userId, nickName, content } = saveCommentDto;
-      await this.httpService.axiosRef.post(`http://172.18.10.9:8084/video/comment`, { videoId, userId, nickName, content });
+      await this.httpService.axiosRef.post(`${this.COMMENT_SERVICE}/video/comment`, { videoId, userId, nickName, content });
       return;
     }
     catch (err) {
