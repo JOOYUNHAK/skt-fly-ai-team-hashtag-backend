@@ -7,7 +7,10 @@ import apiGatewayConfiguration from 'config/api-gateway.configuration';
 
 @Module({
   imports: [
-    HttpModule,
+    HttpModule.register({
+      maxRedirects: 3,
+      timeout: 1000
+    }),
     EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       load: [apiGatewayConfiguration]
