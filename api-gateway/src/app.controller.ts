@@ -1,15 +1,17 @@
 import { HttpService } from "@nestjs/axios";
-import { Body, Controller, Get, Param, Post, Put, Query, HttpException, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query, HttpException, HttpStatus, UseInterceptors, UseFilters, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AxiosResponse } from "axios";
 import { SaveCommentDto } from "./comment-service/dto/comment-service.dto";
 import { PushLikeDto } from "./like-service/dto/like-service-request.dto";
-import { LoginRequestDto } from "./user-service/dto/user-service-requests.dto";
-import { LoginResponseDto } from "./user-service/dto/user-service-responses.dto";
+import { LoginRequestDto } from "./user-service/dto/login-request.dto";
 import { SaveVideoPathDto } from "./video-service/dto/save-video-path.dto";
 import { SaveVideoTitleDto } from "./video-service/save-video-title.dto";
+import { map, mergeWith, Observable } from "rxjs";
+import { ResponseTransformInterceptor } from "./interceptor/transform.interceptor";
 
 @Controller('api/v1')
+@UseInterceptors(ResponseTransformInterceptor)
 export class ApiGateway {
   constructor(
     private readonly httpService: HttpService,
@@ -28,11 +30,11 @@ export class ApiGateway {
    * Port: 8080
   */
   @Get('user/feed/:id')
-  async getMyFeedRequest(@Param('id') id: string): Promise<any> {
+  getMyFeedRequest(@Param('id') id: string): Observable<AxiosResponse> {
     try {
-      //const { data } = await this.httpService.axiosRef.get(`${this.USER_SERVICE}/user/feed/${id}`);
-      //return data;
-      return { data: [ { videoId: '102', thumbNailPath: "aws path" }, { videoId: "19232", thumbNailPath: "aws apth" } ]};
+      return this.httpService
+              .get(`${this.USER_SERVICE}/user/feed/${id}`)
+              .pipe( map(response => response.data) )
     }
     catch (err) {
       throw new HttpException(
@@ -43,11 +45,12 @@ export class ApiGateway {
   }
 
   @Post('auth/login')
-  async loginRequest(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto | void> {
+  loginRequest(@Body() loginRequestDto: LoginRequestDto): Observable<AxiosResponse> {
     try {
       const { phoneNumber, nickName } = loginRequestDto;
-      const { data } = await this.httpService.axiosRef.post(`${this.USER_SERVICE}/auth/login`, { phoneNumber, nickName });
-      return data;
+      return this.httpService
+                .post(`${this.USER_SERVICE}/auth/login`, { phoneNumber, nickName })
+                .pipe( map(response => response.data) )
     }
     catch (err) {
       console.log(err)
@@ -64,10 +67,11 @@ export class ApiGateway {
    * Port: 8081 
   */
   @Get('video/list')
-  async videoListRequest(): Promise<AxiosResponse<any>> {
+  videoListRequest(): Observable<AxiosResponse> {
     try {
-      const { data } = await this.httpService.axiosRef.get(`${this.VIDEO_SERVICE}/video/list`);
-      return data;
+      return this.httpService
+              .get(`${this.VIDEO_SERVICE}/video/list`)
+              .pipe( map(response => response.data) )
     }
     catch (err) {
       console.log(err)
@@ -79,27 +83,17 @@ export class ApiGateway {
   }
 
   @Get('video/detail/:videoId')
-  async videoDetailInfoRequest(@Param('videoId') videoId: string): Promise<any> {
-	  console.log(videoId)
+  videoDetailInfoRequest(@Param('videoId') videoId: string): Observable<AxiosResponse> {
     try {
-      const [videoInfoData, videoCommentData] = await Promise.all([
-        this.httpService.axiosRef.get(`${this.VIDEO_SERVICE}/video/detail/${videoId}`),
-        this.httpService.axiosRef.get(`${this.COMMENT_SERVICE}/video/comment/${videoId}`)
-      ])
-      const { data: videoInfoResponseData } = videoInfoData;
-      const { data: videoCommentsResponseData } = videoCommentData;
-      return {
-        statusCode: 200,
-        message: 'OK',
-        body: {
-          detail: {
-            ...videoInfoResponseData,
-            comments: [
-              ...videoCommentsResponseData
-            ]
-          }
-        }
-      }
+      const [detail$, comments$] = [
+        this.httpService
+          .get(`${this.VIDEO_SERVICE}/video/detail/${videoId}`)
+          .pipe( map( response  => response.data )),
+        this.httpService
+          .get(`${this.COMMENT_SERVICE}/video/comment/${videoId}`)
+          .pipe( map( response => response.data ))
+      ];
+      return detail$.pipe( mergeWith( comments$ ));
     }
     catch (err) {
       console.log(err)
@@ -111,14 +105,12 @@ export class ApiGateway {
   }
 
   @Post('video/path')
-  async saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto) {
+  saveThumbNailPath(@Body() saveVideoPathDto: SaveVideoPathDto):Observable<AxiosResponse>  {
     try {
       const { userId, nickName, videoPath } = saveVideoPathDto;
-      this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath })
-      return {
-        statusCode: 201,
-        message: 'OK'
-      }
+      return this.httpService
+              .post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
@@ -130,11 +122,12 @@ export class ApiGateway {
   }
 
   @Post('video')
-  async saveVideoTitle(@Body() saveVideoTitleDto: SaveVideoTitleDto) {
+  saveVideoTitle(@Body() saveVideoTitleDto: SaveVideoTitleDto): Observable<AxiosResponse> {
     try {
       const { userId, title } = saveVideoTitleDto;
-      await this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}:8081/video`, { userId, title })
-      return;
+      return this.httpService
+              .post(`${this.VIDEO_SERVICE}/video`, { userId, title })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
@@ -146,10 +139,11 @@ export class ApiGateway {
   }
 
   @Put('video')
-  async notUploadVideo(@Body('userId') userId: string) {
+  notUploadVideo(@Body('userId') userId: string):Observable<AxiosResponse> {
     try {
-      await this.httpService.axiosRef.put(`${this.VIDEO_SERVICE}/video`, { userId });
-      return;
+      return this.httpService
+              .put(`${this.VIDEO_SERVICE}/video`, { userId })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
@@ -161,14 +155,12 @@ export class ApiGateway {
   }
 
   @Post('test/video/path')
-  async testVideoPathRouter(@Body() testDto: any) {
+  testVideoPathRouter(@Body() testDto: any):Observable<AxiosResponse> {
     try {
       const { userId, nickName, videoPath, category } = testDto;
-      this.httpService.axiosRef.post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath, category })
-      return {
-        statusCode: 201,
-        message: 'OK'
-      }
+      return this.httpService
+              .post(`${this.VIDEO_SERVICE}/video/path`, { userId, nickName, videoPath, category })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
@@ -185,10 +177,12 @@ export class ApiGateway {
    * Port: 8082 
   */
   @Put('like')
-  async pushLikeRequest(@Body() pushLikeDto: PushLikeDto): Promise<void> {
+  pushLikeRequest(@Body() pushLikeDto: PushLikeDto): Observable<AxiosResponse> {
     try {
       const { userId, videoId } = pushLikeDto;
-      await this.httpService.axiosRef.put(`${this.LIKE_SERVICE}/like`, { userId, videoId });
+      return this.httpService
+              .put(`${this.LIKE_SERVICE}/like`, { userId, videoId })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
@@ -205,18 +199,20 @@ export class ApiGateway {
    * Port: 8083
   */
   @Get('search/video')
-  async searchVideoRequest(@Query('keyword') keyword: string) {
+  searchVideoRequest(@Query('keyword') keyword: string): Observable<AxiosResponse> {
     try {
-      const { data } = await this.httpService.axiosRef.get(`${this.SEARCH_SERVICE}/search/video`, { params: { keyword } });
-      return {
-        statusCode: 200,
-        message: 'OK',
-        body: {
-          data: [
-            ...data
-          ]
-        }
-      }
+      return this.httpService
+              .get(`${this.SEARCH_SERVICE}/search/video`, { params: { keyword } })
+              .pipe( map( response => response.data ))
+      // return {
+      //   statusCode: 200,
+      //   message: 'OK',
+      //   body: {
+      //     data: [
+      //       ...data
+      //     ]
+      //   }
+      // }
     }
     catch (err) {
       console.log(err)
@@ -233,11 +229,12 @@ export class ApiGateway {
    * Port: 8084
   */
   @Post('video/comment')
-  async saveComment(@Body() saveCommentDto: SaveCommentDto) {
+  saveComment(@Body() saveCommentDto: SaveCommentDto): Observable<AxiosResponse> {
     try {
       const { videoId, userId, nickName, content } = saveCommentDto;
-      await this.httpService.axiosRef.post(`${this.COMMENT_SERVICE}/video/comment`, { videoId, userId, nickName, content });
-      return;
+      return this.httpService
+              .post(`${this.COMMENT_SERVICE}/video/comment`, { videoId, userId, nickName, content })
+              .pipe( map( response => response.data ))
     }
     catch (err) {
       console.log(err)
