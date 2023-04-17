@@ -1,5 +1,5 @@
 import { HttpService } from "@nestjs/axios";
-import { Body, Controller, Get, Param, Post, Put, Query, HttpException, HttpStatus, UseInterceptors, UseFilters } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query, UseInterceptors, UseFilters } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AxiosResponse } from "axios";
 import { SaveCommentDto } from "./comment-service/dto/comment-service.dto";
@@ -7,7 +7,7 @@ import { PushLikeDto } from "./like-service/dto/like-service-request.dto";
 import { LoginRequestDto } from "./user-service/dto/login-request.dto";
 import { SaveVideoPathDto } from "./video-service/dto/save-video-path.dto";
 import { SaveVideoTitleDto } from "./video-service/save-video-title.dto";
-import { map, mergeWith, Observable } from "rxjs";
+import { catchError, map, mergeWith, Observable, of } from "rxjs";
 import { ResponseTransformInterceptor } from "./interceptor/transform.interceptor";
 import { AllHttpExceptionFilter } from "./filter/http-exception.filter";
 
@@ -34,7 +34,7 @@ export class ApiGateway {
   @Get('user/feed/:id')
   getMyFeedRequest(@Param('id') id: string): Observable<AxiosResponse> {
     return this.httpService
-      .get(`http://127.0.0.1:8080/user/feed/${id}`)
+      .get(`${this.USER_SERVICE}/user/feed/${id}`)
       .pipe(map(response => response.data))
   }
 
@@ -63,10 +63,16 @@ export class ApiGateway {
     const [detail$, comments$] = [
       this.httpService
         .get(`${this.VIDEO_SERVICE}/video/detail/${videoId}`)
-        .pipe(map(response => response.data)),
+        .pipe(
+          map(response => response.data),
+          catchError(_ => of({ video: 'error' }))
+          ),
       this.httpService
-        .get(`${this.COMMENT_SERVICE}/video/comment/${videoId}`)
-        .pipe(map(response => response.data))
+        .get(`{this.COMMENT_SERVICE}/video/comment/${videoId}`)
+        .pipe(
+          map(response => response.data),
+          catchError(_ => of({ commens: 'error' }))
+        )
     ];
     return detail$.pipe(mergeWith(comments$));
   }
