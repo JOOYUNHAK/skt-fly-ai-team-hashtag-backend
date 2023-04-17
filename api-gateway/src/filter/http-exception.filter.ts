@@ -17,8 +17,9 @@ export class AllHttpExceptionFilter implements ExceptionFilter {
 
 function createErrorResponseBody(exception: any, ctx: HttpArgumentsHost) {
     const request = ctx.getRequest();
+    const method = request.method;
     let errorResponseBody = {
-        value: request.method === 'GET' ?
+        value: method === 'GET' ?
             ( Object.keys(request.params).length ? 
                 request.params : request.query ) : request.body,
         }
