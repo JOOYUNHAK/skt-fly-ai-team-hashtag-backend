@@ -1,8 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions } from '@nestjs/microservices';
-import { Transport } from '@nestjs/microservices/enums';
 import { SwaggerModule } from '@nestjs/swagger';
-import { join } from 'path';
+import 'reflect-metadata';
 import { CreateApiDocument } from './api/v1/swagger/create.document';
 import { AppModule } from './app.module';
 
