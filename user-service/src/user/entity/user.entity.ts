@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { v1 as uuidv1 } from "uuid";
-import { LoginRequestDto } from "../../auth/dto/login-requestdto";
+
 @Entity({ name: 'user' })
 export class User {
     @ApiProperty({
