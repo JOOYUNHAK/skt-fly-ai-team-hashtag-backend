@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserView } from 'src/api/v1/user/entity/user-view.entity';
-import { User } from 'src/api/v1/user/entity/user.entity';
+import { UserView } from 'src/user/entity/user-view.entity';
+import { User } from 'src/user/entity/user.entity';
 import { DataSource } from 'typeorm';
 
 export const databaseProviders = [
