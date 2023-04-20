@@ -7,7 +7,6 @@ import { FindUserByPhoneNumberQueryHandler } from "./query/find-user-ph-query.ha
 import { GetUserInfoQueryHandler } from "./query/get-user-info-query.handler";
 import { UserController } from "./user.controller";
 import { userRepository } from "./user.repository";
-import { UserService } from './user.service';
 
 @Module({
     imports: [ 
@@ -21,13 +20,11 @@ import { UserService } from './user.service';
     controllers: [UserController],
     providers: [
         ...userRepository,
-        UserService,
         FindUserByPhoneNumberQueryHandler,
         RegisterUserCommandHandler,
         GetUserInfoQueryHandler
     ],
     exports: [
-        UserService,
         ...userRepository,
         CqrsModule
     ]

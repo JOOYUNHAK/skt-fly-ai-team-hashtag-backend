@@ -37,11 +37,4 @@ export class User {
         return orderedUuid[2] + orderedUuid[1] + 
             orderedUuid[0] + orderedUuid[3] + orderedUuid[4];
     } 
-
-    static registerNewUser(loginDto: LoginRequestDto) {
-        const user = new User();
-        user.phoneNumber = loginDto.phoneNumber;
-        user.nickName = loginDto.nickName;
-        return user;     
-    }
 }

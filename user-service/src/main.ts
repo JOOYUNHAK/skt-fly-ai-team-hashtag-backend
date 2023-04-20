@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
-import 'reflect-metadata';
 import { CreateApiDocument } from './api/v1/swagger/create.document';
 import { AppModule } from './app.module';
 
