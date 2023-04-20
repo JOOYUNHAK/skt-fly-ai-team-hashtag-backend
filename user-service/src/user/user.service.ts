@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { LoginRequestDto } from '../api/v1/auth/login/dto/login-requestdto';
-import { LoginResponseDto } from '../api/v1/auth/login/dto/login-response.dto';
+import { LoginRequestDto } from '../auth/dto/login-requestdto';
+import { LoginResponseDto } from '../auth/dto/login-response.dto';
 import { createResponse } from '../api/v1/generic/create-response';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';

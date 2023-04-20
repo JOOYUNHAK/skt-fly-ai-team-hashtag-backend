@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { createResponse } from '../generic/create-response';
+import { createResponse } from '../api/v1/generic/create-response';
 import { UserService } from '../user/user.service';
-import { LoginRequestDto } from './login/dto/login-requestdto';
-import { LoginResponseDto } from './login/dto/login-response.dto';
+import { LoginRequestDto } from './dto/login-requestdto';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {

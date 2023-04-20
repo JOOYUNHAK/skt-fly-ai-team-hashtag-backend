@@ -1,13 +1,13 @@
 import { Controller, Post, Body, Get } from "@nestjs/common";
 import { ApiTags, ApiBody, ApiResponse, ApiOperation } from '@nestjs/swagger';
-import { LoginResponseDto } from "./login/dto/login-response.dto";
+import { LoginResponseDto } from "./dto/login-response.dto";
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FindUserByPhoneNumberQuery } from "../user/query/find-user-ph.query";
 import { GetUserInfoQuery } from "../user/query/get-user-info.query";
-import { LoginRequestDto } from "./login/dto/login-requestdto";
+import { LoginRequestDto } from "./dto/login-requestdto";
 import { User } from "../user/entity/user.entity";
 import { RegisterUserCommand } from "../user/command/regitster-user.command";
-import { createResponse } from "../generic/create-response";
+import { createResponse } from "../api/v1/generic/create-response";
 import { HttpService } from "@nestjs/axios";
 
 @ApiTags('Auth')
