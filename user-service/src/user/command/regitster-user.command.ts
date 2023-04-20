@@ -1,6 +1,7 @@
-export class RegisterUserCommand {
+import { ICommand } from "@nestjs/cqrs";
+
+export class RegisterUserCommand implements ICommand {
     constructor(
-        readonly id: string,
         readonly phoneNumber:string,
         readonly nickName: string
     ) {}
