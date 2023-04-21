@@ -8,6 +8,9 @@ import { LoginRequestDto } from "./dto/login-requestdto";
 import { RegisterUserCommand } from "../user/command/regitster-user.command";
 import { FindByPhoneNumberResult } from "src/user/dto/find-by-ph-result.dto";
 import { ResponseTransformInterceptor } from "src/interceptor/transform.interceptor";
+import { InjectMapper, MapPipe } from "@automapper/nestjs";
+import { Mapper } from "@automapper/core";
+import { RegisterUserDto } from "./dto/register-user.dto";
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -16,6 +19,9 @@ export class AuthController {
     constructor(
         private queryBus: QueryBus,
         private commandBus: CommandBus,
+        @InjectMapper()
+        private mapper: Mapper
+
     ) { }
     @ApiOperation({
         summary: '로그인',
@@ -36,21 +42,24 @@ export class AuthController {
         type: LoginResponseDto
     })
     @Post('login')
-    async login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+    async login(@Body(MapPipe(LoginRequestDto, LoginRequestDto)) 
+            loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
 
-        const findResult: FindByPhoneNumberResult =
-                await this.queryBus.execute(new FindUserByPhoneNumberQuery(loginRequestDto.phoneNumber))
+        const findId: FindByPhoneNumberResult =
+                await this.queryBus.execute(new FindUserByPhoneNumberQuery(loginRequestDto.getPhoneNumber()))
         
         /* 로그인 성공 */
-        if( findResult )
-            return await this.queryBus.execute( new GetUserInfoQuery( findResult.id ));     
-        return this.register(loginRequestDto);
+        if( findId ) 
+            return await this.queryBus.execute( new GetUserInfoQuery( findId.id ));     
+        
+        return this.register(this.mapper.map(loginRequestDto, LoginRequestDto, RegisterUserDto));
     }
 
-    async register(loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+    async register(registerUserDto: RegisterUserDto): Promise<LoginResponseDto> {
         /* 회원가입 */
-        const { phoneNumber, nickName } = loginRequestDto;
-        await this.commandBus.execute(new RegisterUserCommand( phoneNumber, nickName ));        
-        return await this.queryBus.execute(new GetUserInfoQuery(phoneNumber));
+        await this.commandBus.execute(new RegisterUserCommand( 
+            registerUserDto.getPhoneNumber(), registerUserDto.getNickName() 
+        ));        
+        return await this.queryBus.execute(new GetUserInfoQuery( registerUserDto.getNickName() ));
     }
 }
