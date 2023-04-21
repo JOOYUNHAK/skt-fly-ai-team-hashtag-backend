@@ -1,4 +1,6 @@
 import { IQuery } from '@nestjs/cqrs';
 export class GetUserInfoQuery implements IQuery {
-    constructor( readonly id: string ) {}
+    constructor( private id: string ) {}
+
+    getId() { return this.id; }
 }

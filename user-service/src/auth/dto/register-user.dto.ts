@@ -1,6 +1,6 @@
 import { AutoMap } from "@automapper/classes";
 
-export class LoginRequestDto {
+export class RegisterUserDto {
     @AutoMap()
     private phoneNumber: string;
     @AutoMap()

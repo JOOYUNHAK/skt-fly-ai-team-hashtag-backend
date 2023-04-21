@@ -15,13 +15,12 @@ export class GetUserInfoQueryHandler implements IQueryHandler<GetUserInfoQuery> 
         private readonly httpService: HttpService
     ) {}    
     async execute(query: GetUserInfoQuery): Promise<UserInfoResponseDto> {
-        const { id } = query;
         const selectQuery = 
             'SELECT LOWER(HEX(`UserView`.`id`)) AS `id`, `UserView`.`nickname` AS `nickname` FROM `user_view` `UserView` WHERE (`UserView`.`id` = unhex(?))'
         
         const [ likeList, userInfo ] = await Promise.all([
-            this.getLikeList(id),
-            this.dataSource.manager.query(selectQuery, [id])
+            this.getLikeList(query.getId()),
+            this.dataSource.manager.query(selectQuery, [query.getId()])
         ]);
 
         return {

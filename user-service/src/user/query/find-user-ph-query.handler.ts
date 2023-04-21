@@ -16,7 +16,7 @@ export class FindUserByPhoneNumberQueryHandler implements IQueryHandler<FindUser
         return await this.userRepository
             .createQueryBuilder()
             .select('LOWER(HEX(id))', 'id')
-            .where('phone_number = :phoneNumber', { phoneNumber: query.phoneNumber })
+            .where('phone_number = :phoneNumber', { phoneNumber: query.getPhoneNumber() })
             .getRawOne();
     }
 }
