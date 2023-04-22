@@ -12,7 +12,6 @@ export class AuthProfile extends AutomapperProfile {
 
     override get profile(): MappingProfile {
         return( mapper ) => {
-            createMap(mapper, LoginRequestDto, LoginRequestDto)
             createMap(mapper, LoginRequestDto, RegisterUserDto)
         }
     }

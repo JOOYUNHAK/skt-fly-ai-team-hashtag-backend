@@ -42,11 +42,10 @@ export class AuthController {
         type: LoginResponseDto
     })
     @Post('login')
-    async login(@Body(MapPipe(LoginRequestDto, LoginRequestDto)) 
-            loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
-
+    async login(@Body() loginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+            
         const findId: FindByPhoneNumberResult =
-                await this.queryBus.execute(new FindUserByPhoneNumberQuery(loginRequestDto.getPhoneNumber()))
+                await this.queryBus.execute(new FindUserByPhoneNumberQuery(loginRequestDto.phoneNumber))
         
         /* 로그인 성공 */
         if( findId ) 
@@ -57,9 +56,8 @@ export class AuthController {
 
     async register(registerUserDto: RegisterUserDto): Promise<LoginResponseDto> {
         /* 회원가입 */
-        await this.commandBus.execute(new RegisterUserCommand( 
-            registerUserDto.getPhoneNumber(), registerUserDto.getNickName() 
-        ));        
-        return await this.queryBus.execute(new GetUserInfoQuery( registerUserDto.getNickName() ));
+        const { phoneNumber, nickName } = registerUserDto;
+        await this.commandBus.execute(new RegisterUserCommand( phoneNumber, nickName ));        
+        return await this.queryBus.execute(new GetUserInfoQuery( nickName ));
     }
 }

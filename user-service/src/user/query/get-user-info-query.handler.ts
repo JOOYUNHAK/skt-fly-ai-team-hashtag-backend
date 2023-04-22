@@ -18,9 +18,10 @@ export class GetUserInfoQueryHandler implements IQueryHandler<GetUserInfoQuery> 
         const selectQuery = 
             'SELECT LOWER(HEX(`UserView`.`id`)) AS `id`, `UserView`.`nickname` AS `nickname` FROM `user_view` `UserView` WHERE (`UserView`.`id` = unhex(?))'
         
+        const { id } = query;
         const [ likeList, userInfo ] = await Promise.all([
-            this.getLikeList(query.getId()),
-            this.dataSource.manager.query(selectQuery, [query.getId()])
+            this.getLikeList(id),
+            this.dataSource.manager.query(selectQuery, [id])
         ]);
 
         return {
