@@ -19,6 +19,10 @@ import { EventEmitterModule } from "@nestjs/event-emitter";
 import { UploadVideoCompleteEventHandler } from "./event/upload-video-complete-event.handler";
 import { CommunicationErrorAiEventHandler } from "./event/communication-error-ai-event.handler";
 import { S3Module } from "src/aws/s3/s3.module";
+import { SaveSSEInstanceCommandHandler } from "./command/save-sse-instance-command.handler";
+import { UploadFileToS3CommandHandler } from "./command/upload-file-to-s3-command.handler";
+import { SummaryContentSaveCompleteEventHandler } from "./event/summary-content-save-complete-event.handler";
+import { LoadFileByFsQueryHandler } from "./query/load-file-by-fs-query.handler";
 
 @Module({
     imports: [
@@ -46,6 +50,10 @@ import { S3Module } from "src/aws/s3/s3.module";
         NotUploadVideoCommandHandler,
         UploadVideoCompleteEventHandler,
         CommunicationErrorAiEventHandler,
+        SaveSSEInstanceCommandHandler,
+        UploadFileToS3CommandHandler,
+        SummaryContentSaveCompleteEventHandler,
+        LoadFileByFsQueryHandler
     ]
 })
 export class VideoModule {}

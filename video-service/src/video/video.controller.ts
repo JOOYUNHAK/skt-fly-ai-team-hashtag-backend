@@ -7,19 +7,19 @@ import { GetVideoDetailQuery } from "./query/get-video-detail.query";
 import { SaveVideoPathDto } from "./dto/save-video-path.dto";
 import { SaveVideoPathCommand } from "./command/save-video-path.command";
 import { UploadVideoDto } from "./dto/upload-video.dto";
-import { GetTempVideoDataQuery } from "./query/get-temp-video-data.query";
 import { HttpService } from "@nestjs/axios";
 import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { Request, Response } from "express";
 import { createSession } from "better-sse";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import * as fs from 'fs';
 import { ConfigService } from "@nestjs/config";
-import * as path from "path";
 import { SaveAiResponseCommand } from "./command/save-ai-response.command";
 import { UploadCompleteVideoCommand } from "./command/upload-complete-video.command";
 import { NotUploadVideoCommand } from "./command/not-upload-video.command";
 import { CommunicationErrorAiEvent } from "./event/communication-error-ai.event";
+import { UploadFileToS3Command } from "./command/upload-file-to-s3.command";
+import { GetBeforeSummaryVideoPathQuery } from "./query/get-before-summary-video-path-query";
+import { SaveSSEInstanceCommand } from "./command/save-sse-instance.command";
+import { LoadFileByFsQuery } from "./query/load-file-by-fs.query";
 
 
 @Controller('video')
@@ -34,21 +34,6 @@ export class VideoController {
     ) { }
     private videoHash: Object = {};
     private readonly categoryLabel = ['가족', '스터디', '뷰티', '반려동물', '운동/스포츠', '음식', '여행', '연애/결혼', '문화생활', '직장인'];
-    /* @Post()
-    @UseInterceptors(FileFieldsInterceptor([
-        { name: 'video', maxCount: 1 },
-        { name: 'image', maxCount: 1 }
-    ]))
-    async upload(
-        @UploadedFiles() files: Express.MulterS3.File[],
-        @Body() uploadFilesDto: UploadFilesDto
-    ) {
-        const { video, image } = JSON.parse(JSON.stringify(files));
-        const { userId: owner } = uploadFilesDto;
-        await this.commandBus.execute(
-            new UploadFilesCommand(owner, video[0].location, image[0].location)
-        );
-    } */
 
     /* main page loading시 최신 비디오, 인기 비디오 로딩 */
     @Get('list')
@@ -84,7 +69,7 @@ export class VideoController {
         category.map((eachCategory) => label.push( this.categoryLabel.indexOf(eachCategory) ));
         this.httpService
             .axiosRef
-            .post(`http://52.78.122.30:5000/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label  })
+            .post(`${this.configService.get('url.ai')}/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label  })
             .then((res) => {
                 console.log('response arrive from ai Team...');
                 const { data: responseData } = res;
@@ -102,9 +87,8 @@ export class VideoController {
     async sentEventToClient(payload?: any, @Req() req?: Request, @Res() res?: Response) {
         /* Event가 아닌 sse 연결 요청일 때 */
         if (req?.body) {
-            const { userId } = req.body;
             const sse = await createSession(req, res);
-            this.videoHash[userId] = sse;
+            await this.commandBus.execute(new SaveSSEInstanceCommand(req.body.userId, sse));
             return;
         }
         /* complete Event 신호가 들어왔을 때 */
@@ -118,68 +102,14 @@ export class VideoController {
             category
         } = data;
 
-        /* 해당 user의 http 연결 객체 */
-        const sse = this.videoHash[userId];
+        /* AI 팀이 요약한 영상과 이미지 저장 경로로부터 가져오고 S3에 업로드*/
+        const [ videoStream, thumbNailStream ] = await this.queryBus.execute(new LoadFileByFsQuery( videoPath, thumbNailPath ));
+        await this.commandBus.execute(new UploadFileToS3Command(videoPath, thumbNailPath, videoStream, thumbNailStream));
 
-        /* @todo s3객체 inject, bucket 밖으로 빼기 */
-        const REGION = this.configService.get('AWS.S3.REGION') // aws s3 region
-        const BUCKET = this.configService.get('AWS.S3.BUCKET');// aws s3 bucket
-
-        // s3 client 객체 생성
-        const s3Client = new S3Client({
-            region: REGION,
-            credentials: {
-                accessKeyId: this.configService.get('AWS.S3.ACCESS_KEY_ID'),
-                secretAccessKey: this.configService.get('AWS.S3.SECRET_ACCESS_KEY')
-            }
-        });
-        /* 저장된 경로에서 파일들 읽기 */
-        let videoStream: fs.ReadStream;
-        let thumbNailStream: fs.ReadStream;
-            console.log('before read createreadstream......')
-        try {
-            [videoStream, thumbNailStream] = await Promise.all([
-                fs.createReadStream(videoPath),
-                fs.createReadStream(thumbNailPath)
-            ]);
-        }
-        catch (err) {
-            console.log('createReadStream error...', err);
-        };
-
-        /* s3에 올리기 위한 Key값들 */
-        const thumbNailKey = 'images/' + path.basename(thumbNailPath);
-        const videoKey = 'videos/' + path.basename(videoPath);
-
-        const uploadImageParams = {
-            ACL: 'public-read',
-            Bucket: BUCKET,
-            Key: thumbNailKey,
-            Body: thumbNailStream
-        };
-        const uploadVideoParams = {
-            ACL: 'public-read',
-            Bucket: BUCKET,
-            Key: videoKey,
-            Body: videoStream
-        };
-        /* s3에 upload */
-        try {
-            await Promise.all([
-                s3Client.send(new PutObjectCommand(uploadVideoParams)),
-                s3Client.send(new PutObjectCommand(uploadImageParams))
-            ]);
-            
-            thumbNailPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${thumbNailKey}`;
-            videoPath = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${videoKey}`;
-            
-            await this.commandBus.execute(new SaveAiResponseCommand(userId, nickName, thumbNailPath, videoPath, tags, category));
-            sse.push({ userId, nickName, thumbNailPath, videoPath, tags }); // event to client
-
-            delete this.videoHash[userId]; // 해당 user의 연결 삭제
-        } catch (err) {
-            console.log('error in aws return...', err);
-        }
+        /* S3에 업로드 하고 난 이후 사용자가 영상을 보고 저장을 하지 
+            않을수도 있으므로 요약 전 영상 경로와 함께 요약된 정보 저장 */
+        const beforeSummaryVideoPath = await this.queryBus.execute(new GetBeforeSummaryVideoPathQuery(userId)); 
+        await this.commandBus.execute(new SaveAiResponseCommand(userId, nickName, videoPath, thumbNailPath, tags, category, beforeSummaryVideoPath))
     }
     
     /* Ai 팀과 통신 오류 났을 때 */
