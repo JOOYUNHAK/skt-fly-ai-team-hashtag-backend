@@ -6,11 +6,10 @@ import * as path from "path";
 
 @Injectable()
 export class S3Service {
+    private readonly s3Client: S3Client;
+
     constructor(
         private readonly configService: ConfigService,
-        private readonly s3Client: S3Client,
-        private readonly bucket: string,
-        private readonly region: string
     ) {
         this.s3Client = new S3Client({
             region: this.configService.get('AWS.S3.REGION'),
@@ -19,8 +18,6 @@ export class S3Service {
                 secretAccessKey: this.configService.get('AWS.S3.SECRET_ACCESS_KEY')
             }
         })
-        this.bucket = this.configService.get('AWS.S3.BUCKET');
-        this.region = this.configService.get('AWS.S3.REGION');
     }
 
     getKey(type: string, filePath: string) {
@@ -40,12 +37,16 @@ export class S3Service {
         }
     }
 
-    createPutObjectCommand(key: string, file: fs.ReadStream): PutObjectCommandInput {
+    createPutObjectCommand(bucket: string, key: string, file: fs.ReadStream): PutObjectCommandInput {
         return {
             ACL: 'private',
-            Bucket: this.bucket,
+            Bucket: bucket,
             Key: key,
             Body: file
         };
+    }
+
+    createS3FileURL(bucket: string, region: string, key: string): string {
+        return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
     }
 }
