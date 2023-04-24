@@ -6,13 +6,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { VideoModule } from './video/video.module';
+import serviceConfiguration from 'config/service.configuration';
 
 @Module({
   imports: [
     VideoModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfiguration, awsConfiguration]
+      load: [serviceConfiguration, databaseConfiguration, awsConfiguration]
     }),
     DatabaseModule,
   ],
