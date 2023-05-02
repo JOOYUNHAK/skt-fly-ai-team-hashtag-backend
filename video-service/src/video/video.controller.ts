@@ -1,33 +1,29 @@
 import { Controller, Post, Get, Body, Param, Req, Res, Put } from "@nestjs/common";
-import { CommandBus, EventBus, QueryBus } from "@nestjs/cqrs";
-import { GetVideoListResponseDto } from "./dto/response/video-request-response.dto";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { GetVideoListResponseDto } from "./interface/dto/response/video-request-response.dto";
 import { GetThumbNailPathQuery } from "./query/get-thumb-nail-path.query";
 import { GetVideoListQuery } from "./query/get-video-list.query";
 import { GetVideoDetailQuery } from "./query/get-video-detail.query";
-import { SaveVideoPathDto } from "./dto/save-video-path.dto";
-import { SaveVideoPathCommand } from "./command/save-video-path.command";
-import { UploadVideoDto } from "./dto/upload-video.dto";
-import { HttpService } from "@nestjs/axios";
+import { UploadVideoDto } from "./interface/dto/upload-video.dto";
 import { Request, Response } from "express";
 import { createSession } from "better-sse";
-import { ConfigService } from "@nestjs/config";
 import { UploadCompleteVideoCommand } from "./command/upload-complete-video.command";
 import { NotUploadVideoCommand } from "./command/not-upload-video.command";
 import { SaveSSEInstanceCommand } from "./command/save-sse-instance.command";
-import { SummaryCompleteEvent } from "./event/summary-complete.event";
-import { SummaryFailEvent } from "./event/summary-fail-event";
-
+import { StartSummaryDto } from "./interface/dto/start-summary.dto";
+import { MapPipe } from "@automapper/nestjs";
+import { VideoMetaInfo } from "./domain/video/video-meta-info";
+import { VideoService } from "./application/video.service";
+import { CompleteSummaryDto } from "./interface/dto/complete-summary.dto";
+import { VideoSummaryInfo } from "./domain/video/video-summary-info";
 
 @Controller('video')
 export class VideoController {
     constructor(
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
-        private readonly httpService: HttpService,
-        private readonly eventBus: EventBus,
-        private readonly configService: ConfigService,
+        private readonly videoService: VideoService,
     ) { }
-    private readonly categoryLabel = ['가족', '스터디', '뷰티', '반려동물', '운동/스포츠', '음식', '여행', '연애/결혼', '문화생활', '직장인'];
 
     /* main page loading시 최신 비디오, 인기 비디오 로딩 */
     @Get('list')
@@ -54,27 +50,17 @@ export class VideoController {
         return videoInfo;
     }
 
-    /* 요약 영상 원하는 비디오 경로 저장 */
-    @Post('path')
-    async saveVideoPath(@Body() saveVideoPathDto: SaveVideoPathDto,) {
-        const label = [];
-        const { userId, nickName, videoPath, category } = saveVideoPathDto;
-        await this.commandBus.execute(new SaveVideoPathCommand(userId, videoPath));
-        category.map((eachCategory) => label.push(this.categoryLabel.indexOf(eachCategory)));
-        this.httpService
-            .axiosRef
-            .post(`${this.configService.get('url.ai')}/video_summary`, { user_id: userId, nickname: nickName, video_origin_src: videoPath, category: label })
-            .then((res) => {
-                const { data } = res;
-                /* 영상 요약 완료되면 완료 이벤트 전달 */
-                this.eventBus.publish(new SummaryCompleteEvent(
-                    data.user_ID, data.nickname, data.video_image,
-                    data.video_path, data.video_tag, category
-                ))
-            })
-            .catch((err) => {
-                this.eventBus.publish(new SummaryFailEvent(userId));
-            })
+    /* 해당 경로로 요청이 들어오면 클라이언트에서 
+        영상을 저장하고 AI 팀에게 영상 정보를 전송 완료함 */
+    @Post('summary')
+    async startVideoSummary(@Body(MapPipe(StartSummaryDto, VideoMetaInfo)) videoMetaInfo: VideoMetaInfo): Promise<void> {
+        await this.videoService.startVideoSummary(videoMetaInfo);
+    }
+
+    /* Ai 팀으로부터 오는 요약 정보를 업데이트 */
+    @Put('summary')
+    async completeVideoSummary(@Body(MapPipe(CompleteSummaryDto, VideoSummaryInfo)) videoSummaryInfo: VideoSummaryInfo): Promise<void> {
+        await this.videoService.completeVideoSummary(videoSummaryInfo);
     }
 
     @Post('sse')
