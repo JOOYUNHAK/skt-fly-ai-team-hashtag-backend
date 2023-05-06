@@ -1,4 +1,4 @@
 export class UploadVideoDto {
-    userId: string;
-    title: string;
+    readonly videoId: string;
+    readonly title: string;
 }
