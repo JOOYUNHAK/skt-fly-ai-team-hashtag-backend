@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Db, Document, ObjectId } from "mongodb";
-import { GetThumbNailPathDto } from "../dto/get-thumb-nail-path.dto";
+import { GetThumbNailPathDto } from "../interface/dto/get-thumb-nail-path.dto";
 import { GetThumbNailPathPipeLine } from "../pipeline/video.pipeline";
 import { GetThumbNailPathQuery } from "./get-thumb-nail-path.query";
 
