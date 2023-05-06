@@ -11,6 +11,5 @@ export class SummarySuccessEventHandler implements IEventHandler<SummarySuccessE
     async handle(event: SummarySuccessEvent) {
         const emitter = await this.sseRepository.findByUserId(event.video.getOwnerId());
         emitter.push(event.video);
-        emitter.disconnected(); //for test disconnected
     }
 }
