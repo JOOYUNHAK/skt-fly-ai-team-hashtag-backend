@@ -5,11 +5,11 @@ services:
         image: redis:7.0.8
         container_name: redis-container
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.11
+                ipv4_address: ${REDIS}
         volumes:
             - /var/lib/redis:/var/lib/redis
         ports:
@@ -22,18 +22,18 @@ services:
         image: mysql:8.0.32
         container_name: mysql-container
         environment:
-            - MYSQL_USER=root
-            - MYSQL_PASSWORD=1234
-            - MYSQL_ROOT_PASSWORD=1234
-            - MYSQL_DATABASE=video_dot
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
             - TZ=Asia/Seoul
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         volumes:
                 - /var/lib/mysql:/var/lib/mysql
         networks:
             back-tier:
-                ipv4_address: 172.18.10.10
+                ipv4_address: ${MYSQL}
         ports:
             - "3306:3306"
         restart: on-failure:3
@@ -41,93 +41,91 @@ services:
         #    test: ["CMD-SHELL", "netstat -an | grep -q 3306"]
 # api gateway
     api-gateway:
-        image: "wndbsgkr/video-dot-project:api-gateway"
+        image: ${APIGATEWAY_IMAGE}
         container_name: api-gateway
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.4
+                ipv4_address: ${APIGATEWAY}
         ports:
-            - "8000:8000"
+            - ${APIGATEWAY_PORT}
         restart: on-failure:3
 # user service
     user-service:
         depends_on:
             - mysql
         container_name: user-service
-        image: "wndbsgkr/video-dot-project:user-service"
+        image: ${USER_SERVICE_IMAGE}
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.5
+                ipv4_address: ${USER_SERVICE}
         expose:
-            - 8080
+            - ${USER_SERVICE_PORT}
         restart: on-failure:3
 # video service
     video-service:
         depends_on:
             - redis
         container_name: video-service
-        image: "wndbsgkr/video-dot-project:video-service"
+        image: ${VIDEO_SERVICE_IMAGE}
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.6
+                ipv4_address: ${VIDEO_SERVICE}
         ports:
-            - "8081:8081"
-        volumes:
-            - ../output:/home/ubuntu/output
+            - ${VIDEO_SERVICE_PORT}
         restart: on-failure:3
 # like service
     like-service:
         depends_on:
             - redis
         container_name: like-service
-        image: "wndbsgkr/video-dot-project:like-service"
+        image: ${LIKE_SERVICE_IMAGE}
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.7
+                ipv4_address: ${LIKE_SERVICE}
         expose:
-            - 8082
+            - ${LIKE_SERVICE_PORT}
         restart: on-failure:3
 # search service
     search-service:
-        image: "wndbsgkr/video-dot-project:search-service"
+        image: ${SEARCH_SERVICE_IMAGE}
         container_name: search-service
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.8
+                ipv4_address: ${SEARCH_SERVICE}
         expose:
-            - 8083
+            - ${SEARCH_SERVICE_PORT}
         restart: on-failure:3
 # comment service
     comment-service:
-        image: "wndbsgkr/video-dot-project:comment-service"
+        image: ${COMMENT_SERVICE_IMAGE}
         container_name: comment-service
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${UID}
+            - PGID=${GID}
         networks:
             back-tier:
-                ipv4_address: 172.18.10.9
+                ipv4_address: ${COMMENT_SERVICE}
         expose:
-            - 8084
+            - ${COMMENT_SERVICE_PORT}
         restart: on-failure:3
 networks:
     back-tier:
         ipam:
             driver: default
             config:
-                - subnet: "172.18.10.0/24"
+                - subnet: ${NETWORK_SUBNET}
