@@ -48,8 +48,13 @@ SKT FLY AI 과정에서 진행한 프로젝트로 AI 기술을 활용한 쉽고 
 # Node - Version - 18.12.1 #
 ```
 
-## API Specification
-제가 작성했던 API 명세서는 [여기](https://video-dot-project.gitbook.io/video_dot-api/)에서 확인하실 수 있어요
+## 요약 과정 아키텍처
+
+#### Client의 영상 요약 시작
+<img width="883" alt="image" src="https://user-images.githubusercontent.com/99117410/236697909-e0be50c8-f1dc-46d1-b1bc-baae15469029.png">
+
+#### 요약 완료 
+<img width="883" alt="image" src="https://user-images.githubusercontent.com/99117410/236698471-5abec6bf-e2cf-4bc7-a75f-0f51f2e5e867.png">
 
 ## Implement
 - 기능  
