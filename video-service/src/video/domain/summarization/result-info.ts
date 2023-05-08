@@ -1,14 +1,18 @@
 import { AutoMap } from "@automapper/classes";
 
-export class CompleteSummaryDto {
+export class ResultInfo {
     @AutoMap()
-    readonly message: string;
+    private summarizationId: string;
     @AutoMap()
-    readonly summarizationId: string;
+    private message: string;
     @AutoMap()
     readonly imagePath?: string;
     @AutoMap()
     readonly videoPath?: string;
-    @AutoMap()
+
     readonly tags?: string[];
-}
+
+    getId() { return this.summarizationId; };
+
+    getMessage() { return this.message; };
+}   

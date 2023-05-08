@@ -5,11 +5,11 @@ import { GetVideoDetailQuery } from "../query/get-video-detail.query";
 import { UploadVideoDto } from "./dto/upload-video.dto";
 import { StartSummaryDto } from "./dto/start-summary.dto";
 import { MapPipe } from "@automapper/nestjs";
-import { VideoMetaInfo } from "../domain/video/video-meta-info";
+import { VideoMetaInfo } from "../domain/summarization/video-meta-info";
 import { VideoService } from "../application/video.service";
 import { CompleteSummaryDto } from "./dto/complete-summary.dto";
-import { VideoSummaryInfo } from "../domain/video/video-summary-info";
 import { GetThumbNailPathQuery } from "../query/get-thumb-nail-path.query";
+import { ResultInfo } from "../domain/summarization/result-info";
 
 @Controller('video')
 export class VideoController {
@@ -52,19 +52,19 @@ export class VideoController {
 
     /* Ai 팀으로부터 오는 요약 정보를 업데이트 */
     @Put('summary')
-    async completeVideoSummary(@Body(MapPipe(CompleteSummaryDto, VideoSummaryInfo)) videoSummaryInfo: VideoSummaryInfo): Promise<void> {
-        await this.videoService.completeVideoSummary(videoSummaryInfo);
+    async completeVideoSummary(@Body(MapPipe(CompleteSummaryDto, ResultInfo)) resultInfo: ResultInfo): Promise<void> {
+        await this.videoService.completeVideoSummary(resultInfo);
     }
 
     /* 요약된 영상 제목과 함께 전체 업로드 */
     @Post()
     async uploadVideo(@Body() uploadVideoDto: UploadVideoDto) {
-        await this.videoService.uploadVideo(uploadVideoDto.videoId, uploadVideoDto.title);
+        await this.videoService.uploadVideo(uploadVideoDto.summarizationId, uploadVideoDto.title);
     }
 
     /* 요약된 영상 보고 난 이후 저장 하지 않을 때 */
     @Put()
-    async notUploadVideo(@Body('videoId') videoId: string) {
-        await this.videoService.notUploadVideo(videoId);
+    async notUploadVideo(@Body('summarizationId') id: string) {
+        await this.videoService.notUploadVideo(id);
     }
 }
