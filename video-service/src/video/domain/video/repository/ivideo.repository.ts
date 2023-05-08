@@ -1,9 +1,5 @@
-import { VideoEntity } from "../entity/video.entity";
-import { Video } from "../video-domain";
+import { Video } from "../entity/video.entity";
 
 export interface IVideoRepository {
-    save: (videoEntity: VideoEntity) => Promise<void>;
-    updateSummaryInfo: (video: Video) => Promise<void>;
-    findSummaryInfoById: (videoId: string) => Promise<Video>;
-    deleteSummaryInfoById: (videoId: string) => Promise<void>;
+    save: (video: Video) => Promise<void>;
 }
