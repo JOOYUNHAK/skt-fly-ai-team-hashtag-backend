@@ -3,10 +3,10 @@ import { AutomapperProfile, InjectMapper } from "@automapper/nestjs";
 import { Injectable } from "@nestjs/common";
 import { StartSummaryDto } from "../dto/start-summary.dto";
 import { CompleteSummaryDto } from "../dto/complete-summary.dto";
-import { VideoMetaInfo } from "../../domain/video/video-meta-info";
-import { VideoSummaryInfo } from "../../domain/video/video-summary-info";
-import { Video } from "src/video/domain/video/video-domain";
-import { VideoEntity } from "src/video/domain/video/entity/video.entity";
+import { VideoMetaInfo } from "../../domain/summarization/video-meta-info";
+import { ResultInfo } from "src/video/domain/summarization/result-info";
+import { VideoSummarization } from "src/video/domain/summarization/video-summarization";
+import { MetaInfoEntity } from "src/video/domain/summarization/entity/meta-info.entity";
 import { ObjectId } from "mongodb";
 
 @Injectable()
@@ -23,16 +23,12 @@ export class VideoProfile extends AutomapperProfile {
                 forMember(dest => dest.category, mapFrom(source => source.category)),
             ),
             // 요약 완료되었을 때 정보
-            createMap(mapper, CompleteSummaryDto, VideoSummaryInfo,
-                forMember(dest => dest.tags, mapFrom(source => source.tags))    
-            );
-            // 완성된 비디오 데이터베이스에 저장
-            createMap(mapper, Video, VideoEntity,
+            createMap(mapper, CompleteSummaryDto, ResultInfo,
+                forMember(dest => dest.tags, mapFrom(source => source.tags))
+            ),
+            createMap(mapper, VideoSummarization, MetaInfoEntity,
                 forMember(dest => dest._id, mapFrom(source => new ObjectId(source.getId()))),
                 forMember(dest => dest.metaInfo, mapFrom(source => source.getMetaInfo())),
-                forMember(dest => dest.imagePath, mapFrom(source => source.getSummaryInfo().imagePath)),
-                forMember(dest => dest.videoPath, mapFrom(source => source.getSummaryInfo().videoPath)),
-                forMember(dest => dest.tags, mapFrom(source => source.getSummaryInfo().tags)),
             )
         };
     }

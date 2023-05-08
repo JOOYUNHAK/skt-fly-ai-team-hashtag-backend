@@ -12,10 +12,10 @@ import { VideoProfile } from "./interface/mapper/video.profile";
 import { NotificationModule } from "src/notification/notification.module";
 import { GetThumbNailPathQueryHandler } from "./query/get-thumb-nail-path-query.handler";
 import { S3Module } from "src/s3/s3.module";
-import { SummaryFailEventHandler } from "./application/event/handler/summary-fail-event.handler";
-import { SummarySuccessEventHandler } from "./application/event/handler/summary-success-event.handler";
 import { MediaRepository } from "./infra/adapter/media.repository";
-import { VideoDeletedEventHandler } from "./application/event/handler/video-deleted-event.handler";
+import { SummarizationRepository } from "./infra/database/summarization.repository";
+import { NotUploadedVideoEventHandler } from "./application/event/handler/not-upload-video";
+import { SummarizationCompletedEventHandler } from "./application/event/handler/summarization-completed";
 
 @Module({
     imports: [
@@ -32,12 +32,12 @@ import { VideoDeletedEventHandler } from "./application/event/handler/video-dele
         GetVideoDetailQueryHandler,
         GetVideoListQueryHandler,
         GetThumbNailPathQueryHandler,
-        SummaryFailEventHandler,
-        SummarySuccessEventHandler,
         VideoService,
         VideoRepository,
-        VideoDeletedEventHandler,
-        MediaRepository
+        MediaRepository,
+        SummarizationRepository,
+        SummarizationCompletedEventHandler,
+        NotUploadedVideoEventHandler
     ]
 })
 export class VideoModule {}

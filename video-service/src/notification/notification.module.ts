@@ -3,8 +3,7 @@ import { NotificationController } from "./interface/notification.controller";
 import { SseNotificationService } from "./application/sse-notification.service.ts";
 import { SSERepository } from "./infra/sse.repository";
 import { CqrsModule } from "@nestjs/cqrs";
-import { SummaryFailEventHandler } from "./application/event-handler/summary-fail-event.handler";
-import { SummarySuccessEventHandler } from "./application/event-handler/summary-success-event.handler";
+import { SummarizationCompletedEventHandler } from "./application/event-handler/summarization-completed";
 
 @Module({
     imports: [
@@ -14,12 +13,10 @@ import { SummarySuccessEventHandler } from "./application/event-handler/summary-
     providers: [
         SseNotificationService,
         SSERepository,
-        SummarySuccessEventHandler,
-        SummaryFailEventHandler
+        SummarizationCompletedEventHandler
     ],
     exports: [
-        SummarySuccessEventHandler,
-        SummaryFailEventHandler
+        SummarizationCompletedEventHandler
     ]
 })
 
