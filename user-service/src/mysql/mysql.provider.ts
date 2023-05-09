@@ -1,5 +1,4 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserView } from 'src/user/domain/entity/user-view.entity';
 import { User } from 'src/user/domain/entity/user.entity';
 import { DataSource } from 'typeorm';
 
@@ -16,7 +15,7 @@ export const mysqlProviders = [
                 username: configService.get('database.username'),
                 password: configService.get('database.password'),
                 database: configService.get('database.database'),
-                entities: [User, UserView],
+                entities: [User],
                 synchronize: true,
                 logging: true
             });

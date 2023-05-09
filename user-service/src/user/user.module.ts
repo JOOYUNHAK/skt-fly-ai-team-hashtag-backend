@@ -1,16 +1,16 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from '@nestjs/cqrs';
-import { DatabaseModule } from "src/database/database.module";
-import { RegisterUserCommandHandler } from "./command/register-user-command.handler";
-import { FindUserByPhoneNumberQueryHandler } from "./query/find-user-ph-query.handler";
-import { GetUserInfoQueryHandler } from "./query/get-user-info-query.handler";
-import { UserController } from "./user.controller";
-import { userRepository } from "./user.repository";
+import { UserController } from "./interface/user.controller";
+import { userProvider } from "./infra/database/user.provider";
+import { UserRepository } from "./infra/database/user.repository";
+import { UserService } from "./application/user.service";
+import { UserProfile } from "./interface/mapper/user.profile";
+import { MysqlModule } from "src/mysql/mysql.module";
 
 @Module({
     imports: [ 
-        DatabaseModule,
+        MysqlModule,
         CqrsModule,
         HttpModule.register({
             timeout: 3000,
@@ -19,14 +19,15 @@ import { userRepository } from "./user.repository";
     ],
     controllers: [UserController],
     providers: [
-        ...userRepository,
-        FindUserByPhoneNumberQueryHandler,
-        RegisterUserCommandHandler,
-        GetUserInfoQueryHandler
+        ...userProvider,
+        UserProfile,
+        UserService,
+        UserRepository,
     ],
     exports: [
-        ...userRepository,
-        CqrsModule
+        UserProfile,
+        UserService,
+        UserRepository,
     ]
 })
 

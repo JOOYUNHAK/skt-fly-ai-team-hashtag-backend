@@ -5,7 +5,7 @@ import { LoginRequest } from "../domain/login-request";
 import { User } from "src/user/domain/entity/user.entity";
 import { AuthService } from "../application/auth.service";
 import { Mapper } from "@automapper/core";
-import { UserDto } from "src/user/dto/user.dto";
+import { UserDto } from "src/user/interface/dto/user.dto";
 
 @Controller('auth')
 export class AuthController {
