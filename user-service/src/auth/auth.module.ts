@@ -1,19 +1,16 @@
 import { Module } from "@nestjs/common";
-import { AuthController } from "./auth.controller";
 import { UserModule } from "../user/user.module";
-import { HttpModule } from "@nestjs/axios/dist";
-import { AuthProfile } from "src/mapper/auth.profile";
+import { AuthController } from "./interface/auth.controller";
+import { AuthService } from "./application/auth.service";
 
 @Module ({
     imports: [
-        UserModule,
-        HttpModule.register({
-            timeout: 3000,
-            maxRedirects: 3
-        }) 
+        UserModule
     ],
     controllers: [AuthController],
-    providers: [AuthProfile]
+    providers: [
+        AuthService
+    ]
 })
 
 export class AuthModule {}
