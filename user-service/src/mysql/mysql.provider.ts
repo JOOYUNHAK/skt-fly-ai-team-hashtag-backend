@@ -1,9 +1,9 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserView } from 'src/user/entity/user-view.entity';
-import { User } from 'src/user/entity/user.entity';
+import { UserView } from 'src/user/domain/entity/user-view.entity';
+import { User } from 'src/user/domain/entity/user.entity';
 import { DataSource } from 'typeorm';
 
-export const databaseProviders = [
+export const mysqlProviders = [
     {
         provide: 'DATA_SOURCE',
         import: [ConfigModule],
