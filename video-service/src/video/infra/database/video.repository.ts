@@ -24,7 +24,7 @@ export class VideoRepository implements IVideoRepository {
                         .find(
                             { userId },
                             {
-                                sort: { uploadedAt: -1 }, 
+                                sort: { _id: -1 }, 
                                 projection: { imagePath: 1 } 
                             }
                         )
