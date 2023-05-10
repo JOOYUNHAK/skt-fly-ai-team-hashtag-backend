@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { Db } from "mongodb";
-import { GetHotVideoListPipeLine, GetRecentVideoListPipeLine } from "../pipeline/video.pipeline";
+import { GetHotVideoListPipeLine, GetRecentVideoListPipeLine } from "../../infra/database/pipeline/video.pipeline";
 import { GetVideoListQuery } from "./get-video-list.query";
 
 @QueryHandler(GetVideoListQuery)

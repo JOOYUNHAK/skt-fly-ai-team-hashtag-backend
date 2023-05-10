@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { Db, Document, ObjectId, WithId } from "mongodb";
-import { GetVideoDetailPipeLine } from "../pipeline/video.pipeline";
+import { Db } from "mongodb";
+import { GetVideoDetailPipeLine } from "../../infra/database/pipeline/video.pipeline";
 import { GetVideoDetailQuery } from "./get-video-detail.query";
 
 @QueryHandler(GetVideoDetailQuery)
