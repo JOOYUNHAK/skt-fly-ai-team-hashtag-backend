@@ -1,7 +1,7 @@
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { MongoClient } from "mongodb";
 
-export const databaseProviders = [
+export const mongodbProviders = [
     {
         provide: 'MONGO_CONNECTION',
         import: [ConfigModule],
