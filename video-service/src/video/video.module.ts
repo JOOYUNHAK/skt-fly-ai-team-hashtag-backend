@@ -15,6 +15,8 @@ import { SummarizationRepository } from "./infra/database/summarization.reposito
 import { NotUploadedVideoEventHandler } from "./application/event/handler/not-upload-video";
 import { SummarizationCompletedEventHandler } from "./application/event/handler/summarization-completed";
 import { MongodbModule } from "src/mongodb/mongodb.module";
+import { CommentRepository } from "./infra/database/comment.repository";
+import { CommentedToVideoEventHandler } from "./application/event/handler/commented-video";
 
 @Module({
     imports: [
@@ -35,7 +37,9 @@ import { MongodbModule } from "src/mongodb/mongodb.module";
         MediaRepository,
         SummarizationRepository,
         SummarizationCompletedEventHandler,
-        NotUploadedVideoEventHandler
+        NotUploadedVideoEventHandler,
+        CommentRepository,
+        CommentedToVideoEventHandler
     ]
 })
 export class VideoModule {}

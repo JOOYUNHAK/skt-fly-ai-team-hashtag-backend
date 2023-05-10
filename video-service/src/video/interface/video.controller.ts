@@ -2,13 +2,15 @@ import { Controller, Post, Get, Body, Param, Put, ParseIntPipe } from "@nestjs/c
 import { QueryBus } from "@nestjs/cqrs";
 import { GetVideoListQuery } from "../application/query/get-video-list.query";
 import { GetVideoDetailQuery } from "../application/query/get-video-detail.query";
-import { UploadVideoDto } from "./dto/upload-video.dto";
-import { StartSummaryDto } from "./dto/start-summary.dto";
+import { UploadVideoDto } from "./dto/summarization/upload-video.dto";
+import { StartSummaryDto } from "./dto/summarization/start-summary.dto";
 import { MapPipe } from "@automapper/nestjs";
 import { VideoMetaInfo } from "../domain/summarization/video-meta-info";
 import { VideoService } from "../application/video.service";
-import { CompleteSummaryDto } from "./dto/complete-summary.dto";
+import { CompleteSummaryDto } from "./dto/summarization/complete-summary.dto";
 import { ResultInfo } from "../domain/summarization/result-info";
+import { AddCommentDto } from "./dto/comment/add-comment.dto";
+import { VideoComment } from "../domain/comment/video-comment";
 
 @Controller('video')
 export class VideoController {
@@ -65,5 +67,11 @@ export class VideoController {
     @Put()
     async notUploadVideo(@Body('summarizationId') id: string) {
         await this.videoService.notUploadVideo(id);
+    }
+
+    /* 영상에 대한 댓글 작성 */ 
+    @Post('comment')
+    async addCommentToVideo(@Body(MapPipe(AddCommentDto, VideoComment)) videoComment: VideoComment) {
+        await this.videoService.addCommentToVideo(videoComment);
     }
 }
