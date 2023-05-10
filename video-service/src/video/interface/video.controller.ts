@@ -1,14 +1,13 @@
-import { Controller, Post, Get, Body, Param, Put } from "@nestjs/common";
+import { Controller, Post, Get, Body, Param, Put, ParseIntPipe } from "@nestjs/common";
 import { QueryBus } from "@nestjs/cqrs";
-import { GetVideoListQuery } from "../query/get-video-list.query";
-import { GetVideoDetailQuery } from "../query/get-video-detail.query";
+import { GetVideoListQuery } from "../application/query/get-video-list.query";
+import { GetVideoDetailQuery } from "../application/query/get-video-detail.query";
 import { UploadVideoDto } from "./dto/upload-video.dto";
 import { StartSummaryDto } from "./dto/start-summary.dto";
 import { MapPipe } from "@automapper/nestjs";
 import { VideoMetaInfo } from "../domain/summarization/video-meta-info";
 import { VideoService } from "../application/video.service";
 import { CompleteSummaryDto } from "./dto/complete-summary.dto";
-import { GetThumbNailPathQuery } from "../query/get-thumb-nail-path.query";
 import { ResultInfo } from "../domain/summarization/result-info";
 
 @Controller('video')
@@ -33,8 +32,8 @@ export class VideoController {
 
     /* 사용자 MyFeed 조회 */
     @Get(`image/:id`)
-    async getThumbNailPaths(@Param('id') userId: string): Promise<Document[]> {
-        return await this.queryBus.execute(new GetThumbNailPathQuery(userId));
+    async getThumbNailPaths(@Param('id', ParseIntPipe) userId: number): Promise<string[]> {
+        return await this.videoService.getThumbNailPaths(userId);
     }
 
     @Get('detail/:videoId')

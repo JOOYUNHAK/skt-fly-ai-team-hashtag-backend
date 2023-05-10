@@ -1,1 +1,0 @@
-export class FindByPhoneNumberResult { readonly id: string; }

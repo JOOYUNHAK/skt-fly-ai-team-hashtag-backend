@@ -45,11 +45,11 @@ export class VideoService {
 
     /* 요약 완료 이후 사용자가 마음에 들면 영상 업로드 */
     async uploadVideo(summarizationId: string, title: string) {
-        await this.summarizationRepository.updateOneField(summarizationId, 'title', title);
-        /* 
-            영상 업로드 원하면 비디오 생성 요약 정보와는 ID로 참조 
-        */
-        await this.videoRepository.save(new Video(summarizationId));
+        const summarization: VideoSummarization = 
+                         await this.summarizationRepository.findAndUpdateOneField(summarizationId, 'title', title);
+                         
+        /*  영상 업로드 시 video entity로 변경해서 비디오 조회시 해당 테이블 이용 */
+        await this.videoRepository.save(this.mapper.map(summarization, VideoSummarization, Video));
     }
 
     /* 요약 영상이 마음에 들지 않으면 중간 요약 정보들 전부 삭제 */
@@ -59,5 +59,9 @@ export class VideoService {
 
         /* 요약 과정의 정보를 삭제했으면 실제 미디어 파일들 삭제하기 위해 Event */
         this.eventBus.publish(new NotUploadedVideoEvent(summarization)); 
+    }
+
+    async getThumbNailPaths(userId: number): Promise<string []> {
+        return await this.videoRepository.findThumbNailByUserId(userId);
     }
 }

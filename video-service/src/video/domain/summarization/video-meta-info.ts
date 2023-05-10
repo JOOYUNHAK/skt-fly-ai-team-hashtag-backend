@@ -2,7 +2,7 @@ import { AutoMap } from "@automapper/classes";
 
 export class VideoMetaInfo {
     @AutoMap()
-    readonly userId: string;
+    readonly userId: number;
     @AutoMap()
     readonly nickName: string;
     
