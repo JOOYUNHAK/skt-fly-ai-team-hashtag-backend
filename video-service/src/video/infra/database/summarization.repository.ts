@@ -41,18 +41,30 @@ export class SummarizationRepository implements ISummarizationRepository {
                         ]
                     )
     }
-    async updateOneField (id: string, field: string, value: string): Promise<void> {
-        await this.db
-                    .collection('summarization')
-                    .updateOne(
-                        { _id: new ObjectId(id) },
-                        [
-                            { $set: { 
-                                [`${field}`]: value,
-                                lastModified: "$$NOW"
-                            }}
-                        ]
-                    )
+    
+    async findAndUpdateOneField (id: string, field: string, value: any): Promise<VideoSummarization> {
+        return plainToInstance(
+            VideoSummarization,
+            this.db
+                .collection('summarization')
+                .findOneAndUpdate(
+                    { _id: new ObjectId(id) },
+                    [
+                        { $set: { 
+                            [`${field}`]: value,
+                            lastModified: "$$NOW"
+                        }}
+                    ],
+                    {
+                        projection: { 
+                            completedAt: 0, lastModified: 0,
+                            resultInfo: { message: 0 }, status: 0
+                        },
+                        returnDocument: 'after'
+                    }
+                )
+                .then(newDocumentResult => newDocumentResult.value)
+        )
     }
     /* 요약에 실패하면 저장되어 있던 내용 삭제 */
     async delete(id: string): Promise<void> {

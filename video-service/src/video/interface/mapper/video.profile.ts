@@ -8,6 +8,7 @@ import { ResultInfo } from "src/video/domain/summarization/result-info";
 import { VideoSummarization } from "src/video/domain/summarization/video-summarization";
 import { MetaInfoEntity } from "src/video/domain/summarization/entity/meta-info.entity";
 import { ObjectId } from "mongodb";
+import { Video } from "src/video/domain/video/entity/video.entity";
 
 @Injectable()
 export class VideoProfile extends AutomapperProfile {
@@ -29,6 +30,14 @@ export class VideoProfile extends AutomapperProfile {
             createMap(mapper, VideoSummarization, MetaInfoEntity,
                 forMember(dest => dest._id, mapFrom(source => new ObjectId(source.getId()))),
                 forMember(dest => dest.metaInfo, mapFrom(source => source.getMetaInfo())),
+            ),
+            createMap(mapper, VideoSummarization, Video,
+                forMember(dest => dest.summarizationId, mapFrom(source => source.getId().toString())),
+                forMember(dest => dest.userId, mapFrom(source => source.getMetaInfo().userId)),
+                forMember(dest => dest.nickName, mapFrom(source => source.getMetaInfo().nickName)),
+                forMember(dest => dest.imagePath, mapFrom(source => source.getResultInfo().imagePath)),
+                forMember(dest => dest.videoPath, mapFrom(source => source.getResultInfo().videoPath)),
+                forMember(dest => dest.tags, mapFrom(source => source.getResultInfo().tags)),
             )
         };
     }

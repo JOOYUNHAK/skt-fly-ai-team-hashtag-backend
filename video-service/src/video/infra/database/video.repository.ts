@@ -17,4 +17,17 @@ export class VideoRepository implements IVideoRepository {
                     uploadedAt: new Date()
                 });
     }
+
+    async findThumbNailByUserId(userId: number): Promise<any>{  
+        return await this.db
+                        .collection('video')
+                        .find(
+                            { userId },
+                            {
+                                sort: { uploadedAt: -1 }, 
+                                projection: { imagePath: 1 } 
+                            }
+                        )
+                        .toArray()
+    }   
 }

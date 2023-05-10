@@ -7,5 +7,5 @@ export interface ISummarizationRepository {
     delete:(id: string) => Promise<void>;
     findById: (id: string) => Promise<VideoSummarization>;
     updateResultInfo:(resultInfo: ResultInfo) => Promise<void>;
-    updateOneField:(id: string, field: string, value: string) => Promise<void>;
+    findAndUpdateOneField:(id: string, field: string, value: any) => Promise<VideoSummarization>;
 }
