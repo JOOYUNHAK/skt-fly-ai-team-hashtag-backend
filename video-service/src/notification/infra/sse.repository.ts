@@ -11,11 +11,11 @@ export class SSERepository implements INotificationRepository {
         this.sseMap[`${userId}`] = emitter;
     }
 
-    findByUserId(userId: string): any {
+    findByUserId(userId: number): any {
         return this.sseMap[`${userId}`];
     }
 
-    delete(userId: string): any {
+    delete(userId: number): any {
         delete this.sseMap[`${userId}`];
     }
 }
