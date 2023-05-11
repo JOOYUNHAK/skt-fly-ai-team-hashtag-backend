@@ -33,11 +33,11 @@ export class VideoRepository implements IVideoRepository {
     }
 
     /* 각 비디오에 대한 댓글 일정 갯수의 최신 데이터 보관 */
-    async updateVideoComment(videoId: string, videoComment: VideoComment): Promise<void> {
+    async updateVideoComment(videoId: ObjectId, videoComment: VideoComment): Promise<void> {
         await this.db
                 .collection('video')
                 .updateOne(
-                    { _id: new ObjectId(videoId) },
+                    { _id: videoId },
                     { 
                         $push: {
                             comments: {
@@ -47,6 +47,16 @@ export class VideoRepository implements IVideoRepository {
                             }
                         }
                     },
+                )
+    }
+
+    /* 비디오 좋아요 개수 업데이트 */
+    async updateVideoLike(videoId: string, value: number): Promise<void> {
+        await this.db
+                .collection('video')
+                .updateOne(
+                    { _id: new ObjectId(videoId) },
+                    { $inc: { likeCount: value }}
                 )
     }
 }

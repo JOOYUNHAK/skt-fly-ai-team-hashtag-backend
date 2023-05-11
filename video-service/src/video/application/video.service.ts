@@ -13,6 +13,9 @@ import { ResultInfo } from "../domain/summarization/result-info";
 import { MetaInfoEntity } from "../domain/summarization/entity/meta-info.entity";
 import { VideoComment } from "../domain/comment/video-comment";
 import { CommentRepository } from "../infra/database/comment.repository";
+import { Like } from "../domain/like/like";
+import { LikeRepository } from "../infra/database/like.repository";
+import { VideoLikeUpdatedEvent } from "./event/video-like-updated.event";
 
 @Injectable()
 export class VideoService {
@@ -22,6 +25,7 @@ export class VideoService {
         private readonly commentRepository: CommentRepository,
         private readonly publisher: EventPublisher,
         private readonly eventBus: EventBus,
+        private readonly likeRepository: LikeRepository,
         @InjectMapper()
         private readonly mapper: Mapper
     ) {}
@@ -74,5 +78,14 @@ export class VideoService {
         /* 비디오 조회 모델에 일정 갯수의 댓글 올려놓기 위해 이벤트 발행 */ 
         this.publisher.mergeObjectContext(videoComment).commented(); 
         videoComment.commit();
+    }
+
+    async updateVideoLike(like: Like): Promise<void> {
+        like.setState(
+            await this.likeRepository.findByUserAndVideoId(like.videoId, like.userId)
+        )
+    
+        await this.videoRepository.updateVideoLike( like.videoId, like.getCount());
+        this.eventBus.publish(new VideoLikeUpdatedEvent(like));
     }
 }

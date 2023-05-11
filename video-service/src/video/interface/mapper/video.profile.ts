@@ -11,6 +11,8 @@ import { ObjectId } from "mongodb";
 import { Video } from "src/video/domain/video/entity/video.entity";
 import { AddCommentDto } from "../dto/comment/add-comment.dto";
 import { VideoComment } from "src/video/domain/comment/video-comment";
+import { LikeRequestDto } from "../dto/like/like-request.dto";
+import { Like } from "src/video/domain/like/like";
 
 @Injectable()
 export class VideoProfile extends AutomapperProfile {
@@ -40,9 +42,16 @@ export class VideoProfile extends AutomapperProfile {
                 forMember(dest => dest.imagePath, mapFrom(source => source.getResultInfo().imagePath)),
                 forMember(dest => dest.videoPath, mapFrom(source => source.getResultInfo().videoPath)),
                 forMember(dest => dest.tags, mapFrom(source => source.getResultInfo().tags)),
+                forMember(dest => dest.uploadedAt, mapFrom(_ => new Date())),
+                forMember(dset => dset.likeCount, fromValue(0)),
                 forMember(dest => dest.comments, fromValue([]))
             ),
-            createMap(mapper, AddCommentDto, VideoComment)
+            createMap(mapper, AddCommentDto, VideoComment,
+                forMember(dest => dest._id, mapFrom(_ => new ObjectId())),
+                forMember(dest => dest.videoId, mapFrom(source => new ObjectId(source.videoId))),
+                forMember(dest => dest.commentedAt, mapFrom(source => new Date()))
+            ),
+            createMap(mapper, LikeRequestDto, Like)
         };
     }
 }
