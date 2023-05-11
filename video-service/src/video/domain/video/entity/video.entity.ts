@@ -13,7 +13,7 @@ export class Video {
     readonly tags: string[];
     @AutoMap()
     readonly title: string;
-    @AutoMap()
     readonly uploadedAt?: Date;
+    readonly likeCount: number;
     readonly comments: VideoComment [];
 }

@@ -11,6 +11,8 @@ import { CompleteSummaryDto } from "./dto/summarization/complete-summary.dto";
 import { ResultInfo } from "../domain/summarization/result-info";
 import { AddCommentDto } from "./dto/comment/add-comment.dto";
 import { VideoComment } from "../domain/comment/video-comment";
+import { LikeRequestDto } from "./dto/like/like-request.dto";
+import { Like } from "../domain/like/like";
 
 @Controller('video')
 export class VideoController {
@@ -73,5 +75,11 @@ export class VideoController {
     @Post('comment')
     async addCommentToVideo(@Body(MapPipe(AddCommentDto, VideoComment)) videoComment: VideoComment) {
         await this.videoService.addCommentToVideo(videoComment);
+    }
+
+    /* 영상에 대한 좋아요 */
+    @Put('like')
+    async pushLike(@Body(MapPipe(LikeRequestDto, Like)) like: Like) {
+        await this.videoService.updateVideoLike(like);
     }
 }
