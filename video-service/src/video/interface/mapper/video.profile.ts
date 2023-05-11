@@ -1,14 +1,16 @@
-import { Mapper, MappingProfile, createMap, forMember, mapFrom } from "@automapper/core";
+import { Mapper, MappingProfile, createMap, forMember, fromValue, mapFrom } from "@automapper/core";
 import { AutomapperProfile, InjectMapper } from "@automapper/nestjs";
 import { Injectable } from "@nestjs/common";
-import { StartSummaryDto } from "../dto/start-summary.dto";
-import { CompleteSummaryDto } from "../dto/complete-summary.dto";
+import { StartSummaryDto } from "../dto/summarization/start-summary.dto";
+import { CompleteSummaryDto } from "../dto/summarization/complete-summary.dto";
 import { VideoMetaInfo } from "../../domain/summarization/video-meta-info";
 import { ResultInfo } from "src/video/domain/summarization/result-info";
 import { VideoSummarization } from "src/video/domain/summarization/video-summarization";
 import { MetaInfoEntity } from "src/video/domain/summarization/entity/meta-info.entity";
 import { ObjectId } from "mongodb";
 import { Video } from "src/video/domain/video/entity/video.entity";
+import { AddCommentDto } from "../dto/comment/add-comment.dto";
+import { VideoComment } from "src/video/domain/comment/video-comment";
 
 @Injectable()
 export class VideoProfile extends AutomapperProfile {
@@ -38,7 +40,9 @@ export class VideoProfile extends AutomapperProfile {
                 forMember(dest => dest.imagePath, mapFrom(source => source.getResultInfo().imagePath)),
                 forMember(dest => dest.videoPath, mapFrom(source => source.getResultInfo().videoPath)),
                 forMember(dest => dest.tags, mapFrom(source => source.getResultInfo().tags)),
-            )
+                forMember(dest => dest.comments, fromValue([]))
+            ),
+            createMap(mapper, AddCommentDto, VideoComment)
         };
     }
 }

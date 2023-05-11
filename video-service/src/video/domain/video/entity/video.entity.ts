@@ -1,5 +1,6 @@
 import { AutoMap } from "@automapper/classes";
 import { ObjectId } from "mongodb";
+import { VideoComment } from "../../comment/video-comment";
 
 export class Video {
     @AutoMap()
@@ -14,4 +15,5 @@ export class Video {
     readonly title: string;
     @AutoMap()
     readonly uploadedAt?: Date;
+    readonly comments: VideoComment [];
 }

@@ -11,12 +11,15 @@ import { VideoSummarization } from "../domain/summarization/video-summarization"
 import { SummarizationRepository } from "../infra/database/summarization.repository";
 import { ResultInfo } from "../domain/summarization/result-info";
 import { MetaInfoEntity } from "../domain/summarization/entity/meta-info.entity";
+import { VideoComment } from "../domain/comment/video-comment";
+import { CommentRepository } from "../infra/database/comment.repository";
 
 @Injectable()
 export class VideoService {
     constructor(
         private readonly videoRepository: VideoRepository,
         private readonly summarizationRepository: SummarizationRepository,
+        private readonly commentRepository: CommentRepository,
         private readonly publisher: EventPublisher,
         private readonly eventBus: EventBus,
         @InjectMapper()
@@ -63,5 +66,13 @@ export class VideoService {
 
     async getThumbNailPaths(userId: number): Promise<string []> {
         return await this.videoRepository.findThumbNailByUserId(userId);
+    }
+
+    /* 비디오에 대한 댓글 작성 */ 
+    async addCommentToVideo(videoComment: VideoComment):Promise<void> {
+        await this.commentRepository.save(videoComment); // 댓글 먼저 댓글 저장소에 저장
+        /* 비디오 조회 모델에 일정 갯수의 댓글 올려놓기 위해 이벤트 발행 */ 
+        this.publisher.mergeObjectContext(videoComment).commented(); 
+        videoComment.commit();
     }
 }
