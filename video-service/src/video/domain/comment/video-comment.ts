@@ -6,7 +6,7 @@ import { CommentedToVideoEvent } from "./event/commented-to-video.event";
 export class VideoComment extends AggregateRoot{
     readonly _id?: ObjectId;
     @AutoMap()
-    readonly videoId: string;
+    readonly videoId: ObjectId;
     @AutoMap()
     readonly userId: number;
     @AutoMap()

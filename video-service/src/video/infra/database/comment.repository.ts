@@ -12,9 +12,6 @@ export class CommentRepository implements ICommentRepository {
     async save(videoComment: VideoComment): Promise<void> {
         await this.db
                 .collection('comments')
-                .insertOne({
-                    ...videoComment,
-                    commentedAt: new Date()
-                })
+                .insertOne(videoComment)
     }
 }
