@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, Put, ParseIntPipe } from "@nestjs/common";
+import { Controller, Post, Get, Body, Param, Put, ParseIntPipe, Query } from "@nestjs/common";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetVideoListQuery } from "../application/query/get-video-list.query";
 import { GetVideoDetailQuery } from "../application/query/get-video-detail.query";
@@ -13,6 +13,7 @@ import { AddCommentDto } from "./dto/comment/add-comment.dto";
 import { VideoComment } from "../domain/comment/video-comment";
 import { LikeRequestDto } from "./dto/like/like-request.dto";
 import { Like } from "../domain/like/like";
+import { Video } from "../domain/video/entity/video.entity";
 
 @Controller('video')
 export class VideoController {
@@ -23,15 +24,8 @@ export class VideoController {
 
     /* main page loading시 최신 비디오, 인기 비디오 로딩 */
     @Get('list')
-    async getVideoList(): Promise<any> {
-        const data = await this.queryBus.execute(new GetVideoListQuery());
-        return {
-            statusCode: 200,
-            message: 'OK',
-            body: {
-                ...data
-            }
-        }
+    async getVideoList(@Query('userId') userId?: string): Promise<any> {
+        return await this.queryBus.execute(new GetVideoListQuery(+userId));
     }
 
     /* 사용자 MyFeed 조회 */
@@ -41,9 +35,8 @@ export class VideoController {
     }
 
     @Get('detail/:videoId')
-    async getVideoDetail(@Param('videoId') videoId: string): Promise<any> {
-        const [videoInfo] = await this.queryBus.execute(new GetVideoDetailQuery(videoId));
-        return videoInfo;
+    async getVideoDetail(@Param('videoId') videoId: string): Promise<Video> {
+        return await this.queryBus.execute(new GetVideoDetailQuery(videoId));
     }
 
     /* 해당 경로로 요청이 들어오면 클라이언트에서 

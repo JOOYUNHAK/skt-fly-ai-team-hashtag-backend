@@ -1,8 +1,8 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { Db } from "mongodb";
-import { GetVideoDetailPipeLine } from "../../infra/database/pipeline/video.pipeline";
+import { Db, ObjectId } from "mongodb";
 import { GetVideoDetailQuery } from "./get-video-detail.query";
+import { Video } from "src/video/domain/video/entity/video.entity";
 
 @QueryHandler(GetVideoDetailQuery)
 export class GetVideoDetailQueryHandler implements IQueryHandler<GetVideoDetailQuery> {
@@ -11,10 +11,9 @@ export class GetVideoDetailQueryHandler implements IQueryHandler<GetVideoDetailQ
         private readonly db: Db
     ) { }
 
-    async execute({ videoId }: GetVideoDetailQuery): Promise<any> {
+    async execute({ videoId }: GetVideoDetailQuery): Promise<Video> {
         return await this.db
             .collection('video')
-            .aggregate(GetVideoDetailPipeLine(videoId))
-            .toArray()
-        }
+            .findOne<Video>({ _id: new ObjectId(videoId) });
+    }
 }
