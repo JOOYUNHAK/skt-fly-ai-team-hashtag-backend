@@ -19,10 +19,13 @@ import { CommentRepository } from "./infra/database/comment.repository";
 import { CommentedToVideoEventHandler } from "./application/event/handler/commented-video";
 import { LikeRepository } from "./infra/database/like.repository";
 import { VideoLikeUpdatedEventHandler } from "./application/event/handler/video-like-updated";
+import { SummarizationProvider } from "./infra/database/summarization/summarization.provider";
+import { MysqlModule } from "src/mysql/mysql.module";
 
 @Module({
     imports: [
         CqrsModule,
+        MysqlModule,
         S3Module,
         MongodbModule,
         RedisModule,
@@ -43,7 +46,8 @@ import { VideoLikeUpdatedEventHandler } from "./application/event/handler/video-
         CommentRepository,
         CommentedToVideoEventHandler,
         LikeRepository,
-        VideoLikeUpdatedEventHandler
+        VideoLikeUpdatedEventHandler,
+        ...SummarizationProvider
     ]
 })
 export class VideoModule {}
