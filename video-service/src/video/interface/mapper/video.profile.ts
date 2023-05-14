@@ -3,16 +3,14 @@ import { AutomapperProfile, InjectMapper } from "@automapper/nestjs";
 import { Injectable } from "@nestjs/common";
 import { StartSummaryDto } from "../dto/summarization/start-summary.dto";
 import { CompleteSummaryDto } from "../dto/summarization/complete-summary.dto";
-import { VideoMetaInfo } from "../../domain/summarization/video-meta-info";
-import { ResultInfo } from "src/video/domain/summarization/result-info";
-import { VideoSummarization } from "src/video/domain/summarization/video-summarization";
-import { MetaInfoEntity } from "src/video/domain/summarization/entity/meta-info.entity";
 import { ObjectId } from "mongodb";
 import { Video } from "src/video/domain/video/entity/video.entity";
 import { AddCommentDto } from "../dto/comment/add-comment.dto";
 import { VideoComment } from "src/video/domain/comment/video-comment";
 import { LikeRequestDto } from "../dto/like/like-request.dto";
 import { Like } from "src/video/domain/like/like";
+import { Summarization } from "src/video/domain/summarization/entity/summarization.entity";
+import { SummarizationResult } from "src/video/domain/summarization/entity/summarization-result.entity";
 
 @Injectable()
 export class VideoProfile extends AutomapperProfile {
@@ -22,27 +20,22 @@ export class VideoProfile extends AutomapperProfile {
 
     override get profile(): MappingProfile {
         return (mapper) => {
-            // 요약 시작할 때 요약하는 비디오의 정보
-            createMap(mapper, StartSummaryDto, VideoMetaInfo, 
+            /* 요약 시작할 때 요약 되는 비디오의 메타정보로 변환 */ 
+            createMap(mapper, StartSummaryDto, Summarization, 
                 forMember(dest => dest.originVideoPath, mapFrom(source => source.originVideoPath)),
                 forMember(dest => dest.category, mapFrom(source => source.category)),
             ),
-            // 요약 완료되었을 때 정보
-            createMap(mapper, CompleteSummaryDto, ResultInfo,
+            /* 요약 완료되었을 때 dto를 요약 결과로 변환 */
+            createMap(mapper, CompleteSummaryDto, SummarizationResult,
+                forMember(dest => dest.id, mapFrom( source => source.summarizationId)),
                 forMember(dest => dest.tags, mapFrom(source => source.tags))
             ),
-            createMap(mapper, VideoSummarization, MetaInfoEntity,
-                forMember(dest => dest._id, mapFrom(source => new ObjectId(source.getId()))),
-                forMember(dest => dest.metaInfo, mapFrom(source => source.getMetaInfo())),
-            ),
-            createMap(mapper, VideoSummarization, Video,
-                forMember(dest => dest.summarizationId, mapFrom(source => source.getId().toString())),
-                forMember(dest => dest.userId, mapFrom(source => source.getMetaInfo().userId)),
-                forMember(dest => dest.nickName, mapFrom(source => source.getMetaInfo().nickName)),
-                forMember(dest => dest.imagePath, mapFrom(source => source.getResultInfo().imagePath)),
-                forMember(dest => dest.videoPath, mapFrom(source => source.getResultInfo().videoPath)),
-                forMember(dest => dest.tags, mapFrom(source => source.getResultInfo().tags)),
-                forMember(dest => dest.uploadedAt, mapFrom(_ => new Date())),
+            /* 요약이 완료돼서 사용자가 업로드하면 조회모델로 변경하여 monogo에 업로드 */
+            createMap(mapper, Summarization, Video,
+                forMember(dest => dest.summarizationId, mapFrom(source => source.getId())),
+                forMember(dest => dest.imagePath, mapFrom(source => source.getOutput().getImagePath())),
+                forMember(dest => dest.videoPath, mapFrom(source => source.getOutput().getVideoPath())),
+                forMember(dest => dest.tags, mapFrom(source => source.getOutput().getTags())),
                 forMember(dset => dset.likeCount, fromValue(0)),
                 forMember(dest => dest.comments, fromValue([]))
             ),

@@ -20,4 +20,12 @@ export class UserRepository implements IUserRepository {
     async save(user: User): Promise<User> {
         return await this.userRepository.save(user);
     }
+
+    async findNickNameById(id: number): Promise<string> {
+        return await this.userRepository
+                            .createQueryBuilder()
+                            .select('nickname', 'nickName')
+                            .where('id = :id', { id })
+                            .getRawOne();
+    }
 }

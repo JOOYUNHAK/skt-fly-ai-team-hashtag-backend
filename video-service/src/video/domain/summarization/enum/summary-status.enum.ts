@@ -1,5 +1,6 @@
 export enum SummaryStatus
 {
     SUMMARYING = "SUMMARING", 
-    COMPLETED = "COMPLETED",
+    SUMMARIZED = "SUMMARIZED",
+    UPLOADED = "UPLOADED"
 }

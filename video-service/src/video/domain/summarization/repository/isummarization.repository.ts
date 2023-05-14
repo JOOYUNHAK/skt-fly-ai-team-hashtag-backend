@@ -1,11 +1,7 @@
-import { MetaInfoEntity } from "../entity/meta-info.entity";
-import { ResultInfo } from "../result-info";
-import { VideoSummarization } from "../video-summarization";
+import { Summarization } from "../entity/summarization.entity";
 
 export interface ISummarizationRepository {
-    save: (MetaInfo: MetaInfoEntity) => Promise<void>;
-    delete:(id: string) => Promise<void>;
-    findById: (id: string) => Promise<VideoSummarization>;
-    updateResultInfo:(resultInfo: ResultInfo) => Promise<void>;
-    findAndUpdateOneField:(id: string, field: string, value: any) => Promise<VideoSummarization>;
+    save: (summariztion: Summarization) => Promise<Summarization>;
+    delete:(id: Summarization) => Promise<void>;
+    findById: (id: number) => Promise<Summarization>;
 }
