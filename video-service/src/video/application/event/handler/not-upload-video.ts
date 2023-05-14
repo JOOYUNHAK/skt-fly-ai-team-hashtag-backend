@@ -10,11 +10,11 @@ export class NotUploadedVideoEventHandler implements IEventHandler<NotUploadedVi
     /* 사용자가 요약된 영상 저장하지 않으면 실제 미디어 파일들 삭제 */
     async handle(event: NotUploadedVideoEvent) {
         const summarization = event.summarization;
-        const [metaInfo, resultInfo ] = [summarization.getMetaInfo(), summarization.getResultInfo()];
+        const [originVideoPath, output ] = [summarization.getOriginVideoPath(), summarization.getOutput()];
         await this.mediaRepository.delete([
-            ...metaInfo.originVideoPath,
-            resultInfo.imagePath,
-            resultInfo.videoPath
+            ...originVideoPath,
+            output.getImagePath(),
+            output.getVideoPath()
         ])
     }
-}
+} 

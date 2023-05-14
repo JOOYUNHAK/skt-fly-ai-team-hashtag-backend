@@ -13,7 +13,6 @@ import { S3Module } from "src/s3/s3.module";
 import { MediaRepository } from "./infra/adapter/media.repository";
 import { SummarizationRepository } from "./infra/database/summarization.repository";
 import { NotUploadedVideoEventHandler } from "./application/event/handler/not-upload-video";
-import { SummarizationCompletedEventHandler } from "./application/event/handler/summarization-completed";
 import { MongodbModule } from "src/mongodb/mongodb.module";
 import { CommentRepository } from "./infra/database/comment.repository";
 import { CommentedToVideoEventHandler } from "./application/event/handler/commented-video";
@@ -21,6 +20,7 @@ import { LikeRepository } from "./infra/database/like.repository";
 import { VideoLikeUpdatedEventHandler } from "./application/event/handler/video-like-updated";
 import { SummarizationProvider } from "./infra/database/summarization/summarization.provider";
 import { MysqlModule } from "src/mysql/mysql.module";
+import { UploadedSummarizationVideoEventHandler } from "./application/event/handler/uploaded-summarization-video";
 
 @Module({
     imports: [
@@ -41,13 +41,13 @@ import { MysqlModule } from "src/mysql/mysql.module";
         VideoRepository,
         MediaRepository,
         SummarizationRepository,
-        SummarizationCompletedEventHandler,
         NotUploadedVideoEventHandler,
         CommentRepository,
         CommentedToVideoEventHandler,
         LikeRepository,
         VideoLikeUpdatedEventHandler,
-        ...SummarizationProvider
+        ...SummarizationProvider,
+        UploadedSummarizationVideoEventHandler
     ]
 })
 export class VideoModule {}

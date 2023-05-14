@@ -10,11 +10,11 @@ export class SummarizationCompletedEventHandler implements IEventHandler<Summari
 
     async handle(event: SummarizationCompletedEvent) {
         const { summarization } = event;
-        const userId = summarization.getMetaInfo().userId;
+        const userId = summarization.getUserId();
         const emitter = await this.sseRepository.findByUserId(userId);
         /* 요약 결과에 따른 알림 전송 */ 
-        summarization.getResultInfo().getMessage() === 'succeded' ?
-            emitter.push( summarization.getResultInfo()) : emitter.push('SUMMARY_FAILED');
+        summarization.getResult() === 'succeded' ?
+            emitter.push( summarization.getOutput()) : emitter.push('SUMMARY_FAILED');
 
         await this.sseRepository.delete(userId);
     }

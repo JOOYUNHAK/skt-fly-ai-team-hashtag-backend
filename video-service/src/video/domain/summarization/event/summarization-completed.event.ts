@@ -1,6 +1,6 @@
 import { IEvent } from "@nestjs/cqrs";
-import { VideoSummarization } from "../video-summarization";
+import { Summarization } from "../entity/summarization.entity";
 
 export class SummarizationCompletedEvent implements IEvent {
-    constructor( readonly summarization: VideoSummarization ) {}
+    constructor( readonly summarization: Summarization ) {}
 }

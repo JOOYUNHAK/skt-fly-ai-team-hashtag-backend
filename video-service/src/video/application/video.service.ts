@@ -1,21 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { VideoMetaInfo } from "../domain/summarization/video-meta-info";
-import { ObjectId } from "mongodb";
 import { EventBus, EventPublisher } from "@nestjs/cqrs";
 import { InjectMapper } from "@automapper/nestjs";
 import { Mapper } from "@automapper/core";
 import { Video } from "../domain/video/entity/video.entity";
 import { VideoRepository } from "../infra/database/video.repository";
 import { NotUploadedVideoEvent } from "./event/not-uploaded-video.event";
-import { VideoSummarization } from "../domain/summarization/video-summarization";
 import { SummarizationRepository } from "../infra/database/summarization.repository";
-import { ResultInfo } from "../domain/summarization/result-info";
-import { MetaInfoEntity } from "../domain/summarization/entity/meta-info.entity";
 import { VideoComment } from "../domain/comment/video-comment";
 import { CommentRepository } from "../infra/database/comment.repository";
 import { Like } from "../domain/like/like";
 import { LikeRepository } from "../infra/database/like.repository";
 import { VideoLikeUpdatedEvent } from "./event/video-like-updated.event";
+import { Summarization } from "../domain/summarization/entity/summarization.entity";
+import { CompleteSummaryDto } from "../interface/dto/summarization/complete-summary.dto";
+import { SummarizationResult } from "../domain/summarization/entity/summarization-result.entity";
 
 @Injectable()
 export class VideoService {
@@ -31,39 +29,38 @@ export class VideoService {
     ) {}
     
     /* 요약 시작했을 때 Lambda로부터 요약 하려는 영상에 관한 정보 수신 */
-    async startVideoSummary(metaInfo: VideoMetaInfo) {
-        const videoSummarization = new VideoSummarization( new ObjectId().toString() );
-        videoSummarization.start(metaInfo);
-        
+    async startVideoSummary(summarization: Summarization): Promise<void> {
+        summarization.started();
         // 요약 시작 정보 저장
-        await this.summarizationRepository.save(
-            this.mapper.map(videoSummarization, VideoSummarization, MetaInfoEntity)
-        );
+        await this.summarizationRepository.save(summarization);
     }
 
     /* 요약 완료되었을때  AI 팀으로부터 요약 결과 수신 */
-    async completeVideoSummary(resultInfo: ResultInfo) {
-        const videoSummarization: VideoSummarization = this.publisher.mergeObjectContext(
-            await this.summarizationRepository.findById(resultInfo.getId())
+    async completeVideoSummary(completeSummaryDto: CompleteSummaryDto) { 
+
+        const summarization: Summarization = this.publisher.mergeObjectContext(
+            await this.summarizationRepository.findById(completeSummaryDto.summarizationId)
         );
-        videoSummarization.complete(resultInfo);
-        videoSummarization.commit();
+        summarization.summarized(this.mapper.map(completeSummaryDto, CompleteSummaryDto, SummarizationResult));
+        await this.summarizationRepository.save(summarization);
+        summarization.commit();
     }
 
     /* 요약 완료 이후 사용자가 마음에 들면 영상 업로드 */
-    async uploadVideo(summarizationId: string, title: string) {
-        const summarization: VideoSummarization = 
-                         await this.summarizationRepository.findAndUpdateOneField(summarizationId, 'title', title);
-                         
-        /*  영상 업로드 시 video entity로 변경해서 비디오 조회시 해당 테이블 이용 */
-        await this.videoRepository.save(this.mapper.map(summarization, VideoSummarization, Video));
+    async uploadVideo(summarizationId: number, title: string) {
+        const summarization: Summarization = this.publisher.mergeObjectContext(
+            await this.summarizationRepository.findById(summarizationId)
+        )
+        summarization.setTitle(title).upload();    
+        await this.summarizationRepository.save(summarization);
+        /*  영상 업로드 시 조회 모델로 변경 추후 도메인 이벤트로 */
+        summarization.commit();
     }
 
-    /* 요약 영상이 마음에 들지 않으면 중간 요약 정보들 전부 삭제 */
-    async notUploadVideo(summarizationId: string): Promise<void> {
-        const summarization:VideoSummarization = await this.summarizationRepository.findById(summarizationId);
-        await this.summarizationRepository.delete(summarizationId);
-
+    /* 요약 영상이 마음에 들지 않으면 요약 정보들 전부 삭제 */
+    async notUploadVideo(summarizationId: number): Promise<void> {
+        const summarization:Summarization = await this.summarizationRepository.findById(summarizationId);
+        await this.summarizationRepository.delete(summarization);
         /* 요약 과정의 정보를 삭제했으면 실제 미디어 파일들 삭제하기 위해 Event */
         this.eventBus.publish(new NotUploadedVideoEvent(summarization)); 
     }
