@@ -3,12 +3,10 @@ import { AutoMap } from "@automapper/classes";
 export class CompleteSummaryDto {
     @AutoMap()
     readonly message: string;
+    readonly summarizationId: number;
     @AutoMap()
-    readonly summarizationId: string;
+    readonly imagePath: string;
     @AutoMap()
-    readonly imagePath?: string;
-    @AutoMap()
-    readonly videoPath?: string;
-    @AutoMap()
-    readonly tags?: string[];
+    readonly videoPath: string;
+    readonly tags: string[];
 }
