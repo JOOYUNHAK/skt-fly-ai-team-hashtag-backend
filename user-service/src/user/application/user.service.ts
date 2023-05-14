@@ -19,4 +19,8 @@ export class UserService {
     async register(registerInfo: LoginRequest): Promise<User> {
         return await this.userRepository.save(this.mapper.map(registerInfo, LoginRequest, User));
     }
+
+    async getUserNickName(id: number): Promise<string> {
+        return await this.userRepository.findNickNameById(id);
+    }
 }
