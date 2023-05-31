@@ -11,7 +11,8 @@ SKT FLY AI 과정에서 진행한 프로젝트로 AI 기술을 활용한 쉽고 
 
 저희 VideoDot은 AI기술을 활용해 빠르고 편리하게 영상을 요약해 브이로그를 생성해 드리면서 이런 어려움을 해결해드리기 위해 제작되었어요.
 
-앱의 시연 영상은 [여기](https://github.com/skt-fly-teamHashTag/Frontend/blob/master/README.md#%EC%8B%A4%ED%96%89-%EC%98%81%EC%83%81)에서 확인하실 수 있습니다!
+## 시연 영상
+https://github.com/JOOYUNHAK/skt-fly-ai-team-hashtag-backend/assets/99117410/a1748751-32dc-40f2-ae7a-f726887c38d8
 
 ## Features
 - 자신의 앨범에 영상만 있다면 바로 요약해볼 수 있어요.
