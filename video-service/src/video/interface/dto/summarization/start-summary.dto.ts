@@ -1,10 +1,9 @@
-import { AutoMap } from "@automapper/classes";
-
 export class StartSummaryDto {
-    @AutoMap()
     readonly userId: string;
-    @AutoMap()
     readonly originVideoPath: string[];
-    @AutoMap()
     readonly category: string[];
+
+    static of(userId: string, originVideoPath: string[], category: string[]): StartSummaryDto {
+        return { userId, originVideoPath, category };
+    }
 }
