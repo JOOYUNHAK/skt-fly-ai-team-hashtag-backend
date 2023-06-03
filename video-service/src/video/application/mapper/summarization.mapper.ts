@@ -7,10 +7,10 @@ export class SummarizationMapper {
 
     from(startSummaryDto: StartSummaryDto): Summarization {
         return new Summarization(
+            null,
             startSummaryDto.userId,
             startSummaryDto.originVideoPath,
             startSummaryDto.category
         );
     };
-    
 }
