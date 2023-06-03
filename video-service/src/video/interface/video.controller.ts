@@ -45,7 +45,7 @@ export class VideoController {
         영상을 저장하고 AI 팀에게 영상 정보를 전송 완료함 */
     @Post('summary')
     async startVideoSummary(@Body() startSummaryDto: StartSummaryDto): Promise<void> {
-        await this.videoService.startVideoSummary(this.mapper.map(startSummaryDto, StartSummaryDto, Summarization));
+        await this.videoService.startVideoSummary(startSummaryDto);
     }
 
     /* Ai 팀으로부터 오는 요약 정보를 업데이트 */
