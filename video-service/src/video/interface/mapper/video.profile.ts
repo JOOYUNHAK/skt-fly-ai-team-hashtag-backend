@@ -20,11 +20,6 @@ export class VideoProfile extends AutomapperProfile {
 
     override get profile(): MappingProfile {
         return (mapper) => {
-            /* 요약 시작할 때 요약 되는 비디오의 메타정보로 변환 */ 
-            createMap(mapper, StartSummaryDto, Summarization, 
-                forMember(dest => dest.originVideoPath, mapFrom(source => source.originVideoPath)),
-                forMember(dest => dest.category, mapFrom(source => source.category)),
-            ),
             /* 요약 완료되었을 때 dto를 요약 결과로 변환 */
             createMap(mapper, CompleteSummaryDto, SummarizationResult,
                 forMember(dest => dest.id, mapFrom( source => source.summarizationId)),
