@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { EventBus, EventPublisher } from "@nestjs/cqrs";
 import { InjectMapper } from "@automapper/nestjs";
 import { Mapper } from "@automapper/core";
-import { Video } from "../domain/video/entity/video.entity";
 import { VideoRepository } from "../infra/database/video.repository";
 import { NotUploadedVideoEvent } from "./event/not-uploaded-video.event";
 import { SummarizationRepository } from "../infra/database/summarization.repository";
@@ -13,23 +12,26 @@ import { LikeRepository } from "../infra/database/like.repository";
 import { VideoLikeUpdatedEvent } from "./event/video-like-updated.event";
 import { Summarization } from "../domain/summarization/entity/summarization.entity";
 import { CompleteSummaryDto } from "../interface/dto/summarization/complete-summary.dto";
-import { SummarizationResult } from "../domain/summarization/entity/summarization-result.entity";
+import { StartSummaryDto } from "../interface/dto/summarization/start-summary.dto";
+import { SummarizationMapper } from "./mapper/summarization.mapper";
+import { SummarizationResultRepository } from "../infra/database/summarization-result.repository";
 
 @Injectable()
 export class VideoService {
     constructor(
         private readonly videoRepository: VideoRepository,
         private readonly summarizationRepository: SummarizationRepository,
+        private readonly summarizationMapper: SummarizationMapper,
+        private readonly resultRepository: SummarizationResultRepository,
         private readonly commentRepository: CommentRepository,
         private readonly publisher: EventPublisher,
         private readonly eventBus: EventBus,
         private readonly likeRepository: LikeRepository,
-        @InjectMapper()
-        private readonly mapper: Mapper
     ) {}
     
     /* 요약 시작했을 때 Lambda로부터 요약 하려는 영상에 관한 정보 수신 */
-    async startVideoSummary(summarization: Summarization): Promise<void> {
+    async startVideoSummary(startSummaryDto: StartSummaryDto): Promise<void> {
+        const summarization = this.summarizationMapper.from(startSummaryDto);
         summarization.started();
         // 요약 시작 정보 저장
         await this.summarizationRepository.save(summarization);
@@ -37,12 +39,14 @@ export class VideoService {
 
     /* 요약 완료되었을때  AI 팀으로부터 요약 결과 수신 */
     async completeVideoSummary(completeSummaryDto: CompleteSummaryDto) { 
-
         const summarization: Summarization = this.publisher.mergeObjectContext(
             await this.summarizationRepository.findById(completeSummaryDto.summarizationId)
         );
-        summarization.summarized(this.mapper.map(completeSummaryDto, CompleteSummaryDto, SummarizationResult));
+        summarization.summarized();
         await this.summarizationRepository.save(summarization);
+
+        const summarizationResult = this.summarizationMapper.resultFrom(completeSummaryDto);
+        await this.resultRepository.save(summarizationResult);
         summarization.commit();
     }
 
@@ -85,4 +89,5 @@ export class VideoService {
         await this.videoRepository.updateVideoLike( like.videoId, like.getCount());
         this.eventBus.publish(new VideoLikeUpdatedEvent(like));
     }
+
 }
