@@ -4,7 +4,7 @@ import { GetVideoListQuery } from "../application/query/get-video-list.query";
 import { GetVideoDetailQuery } from "../application/query/get-video-detail.query";
 import { UploadVideoDto } from "./dto/summarization/upload-video.dto";
 import { StartSummaryDto } from "./dto/summarization/start-summary.dto";
-import { InjectMapper, MapPipe } from "@automapper/nestjs";
+import { MapPipe } from "@automapper/nestjs";
 import { VideoService } from "../application/video.service";
 import { CompleteSummaryDto } from "./dto/summarization/complete-summary.dto";
 import { AddCommentDto } from "./dto/comment/add-comment.dto";
@@ -12,16 +12,12 @@ import { VideoComment } from "../domain/comment/video-comment";
 import { LikeRequestDto } from "./dto/like/like-request.dto";
 import { Like } from "../domain/like/like";
 import { Video } from "../domain/video/entity/video.entity";
-import { Mapper } from "@automapper/core";
-import { Summarization } from "../domain/summarization/entity/summarization.entity";
 
 @Controller('video')
 export class VideoController {
     constructor(
         private readonly queryBus: QueryBus,
         private readonly videoService: VideoService,
-        @InjectMapper()
-        private readonly mapper: Mapper
     ) { }
 
     /* main page loading시 최신 비디오, 인기 비디오 로딩 */
