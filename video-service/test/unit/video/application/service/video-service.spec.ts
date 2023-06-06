@@ -11,6 +11,7 @@ import { SummarizationResult } from "src/video/domain/summarization/entity/summa
 import { CqrsModule, EventPublisher } from "@nestjs/cqrs";
 import { Summarization } from "src/video/domain/summarization/entity/summarization.entity";
 import { SummarizationCompletedEvent } from "src/video/domain/summarization/event/summarization-completed.event";
+import { SummarizationResultRepository } from "src/video/infra/database/summarization-result.repository";
 
 describe('VideoService Test', () => {
     let dataSource: DataSource;
@@ -28,7 +29,12 @@ describe('VideoService Test', () => {
                     provide: 'SUMMARIZATION_REPOSITORY',
                     useValue: {}
                 },
-                SummarizationRepository
+                SummarizationRepository,
+                {
+                    provide: 'SUMMARIZATION_RESULT_REPOSITORY',
+                    useValue: {}
+                },
+                SummarizationResultRepository
             ],
         }).compile();
 
