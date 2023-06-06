@@ -1,7 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EventBus, EventPublisher } from "@nestjs/cqrs";
-import { InjectMapper } from "@automapper/nestjs";
-import { Mapper } from "@automapper/core";
+import { EventBus, EventPublisher } from "@nestjs/cqrs";;
 import { VideoRepository } from "../infra/database/video.repository";
 import { NotUploadedVideoEvent } from "./event/not-uploaded-video.event";
 import { SummarizationRepository } from "../infra/database/summarization.repository";
