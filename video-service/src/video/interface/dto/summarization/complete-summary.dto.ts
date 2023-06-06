@@ -1,12 +1,24 @@
-import { AutoMap } from "@automapper/classes";
 
 export class CompleteSummaryDto {
-    @AutoMap()
-    readonly message: string;
     readonly summarizationId: number;
-    @AutoMap()
+    readonly message: string;
     readonly imagePath: string;
-    @AutoMap()
     readonly videoPath: string;
     readonly tags: string[];
+
+    static of(
+        summarizationId: number, 
+        imagePath: string = null,
+        videoPath: string = null,
+        tags: string [] = null,
+        message: string
+        ) {
+        return {
+            summarizationId,
+            imagePath,
+            videoPath,
+            tags,
+            message
+        };
+    };
 }
