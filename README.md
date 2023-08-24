@@ -14,6 +14,9 @@ SKT FLY AI 과정에서 진행한 프로젝트로 AI 기술을 활용한 쉽고 
 ## 시연 영상
 https://github.com/JOOYUNHAK/skt-fly-ai-team-hashtag-backend/assets/99117410/a1748751-32dc-40f2-ae7a-f726887c38d8
 
+## Api 명세서
+해당 프로젝트의 Api 명세서는 [이곳에서](https://video-dot-project.gitbook.io/video_dot-api-v1/)확인하실 수 있습니다.
+
 ## Features
 - 자신의 앨범에 영상만 있다면 바로 요약해볼 수 있어요.
 - 해시태그와 썸네일까지! 영상을 보시고 제목만 설정해 주세요.
